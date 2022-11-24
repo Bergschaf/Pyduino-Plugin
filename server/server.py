@@ -34,10 +34,13 @@ from pygls.lsp.types import (CompletionItem, CompletionList, CompletionOptions,
                              Range, Registration, RegistrationParams,
                              SemanticTokens, SemanticTokensLegend, SemanticTokensParams,
                              Unregistration, UnregistrationParams)
-from pygls.lsp.types.basic_structures import (WorkDoneProgressBegin,
+from pygls.lsp.types.basic_structures import (WorkDoneProgressBegin, 
                                               WorkDoneProgressEnd,
                                               WorkDoneProgressReport)
 from pygls.server import LanguageServer
+
+from compiler import Compiler
+print("Starting server...")
 
 COUNT_DOWN_START_IN_SECONDS = 10
 COUNT_DOWN_SLEEP_IN_SECONDS = 1
