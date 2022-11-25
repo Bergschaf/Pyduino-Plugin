@@ -2,20 +2,28 @@ from server.compiler.utils import Utils
 from server.compiler.builtin_functions import BuiltinsArduino, BuiltinsPC
 from server.compiler.constants import Constants
 from server.compiler.variables import Variables
+from server.compiler.error import Error
 
 
 class Compiler(Utils):
-    def __init__(self, variables: Variables, code: list, mode: str):
+    def __init__(self, code: list, mode: str, variables: Variables = None):
+        if variables is None:
+            self.Variables = Variables()
+        else:
+            self.Variables = variables
+
+        self.errors: list[Error] = []
         if mode == "arduino":
-            builtins = BuiltinsArduino(variables)
+            builtins = BuiltinsArduino(self.Variables, self.errors)
         elif mode == "pc":
-            builtins = BuiltinsPC(variables)
+            builtins = BuiltinsPC(self.Variables, self.errors)
         else:
             raise Exception("Invalid mode")
-        super().__init__(variables, builtins)
+        super().__init__(self.Variables, builtins, self.errors)
         self.code = code
-        self.Variables = variables
         self.mode = mode
+        self.compiling = False
+    
         self.intialize()
 
     def intialize(self):
@@ -26,6 +34,7 @@ class Compiler(Utils):
         self.Variables.totalLineCount = len(self.code)
         for line in self.code:
             self.Variables.indentations.append(self.get_line_indentation(line))
+        self.Variables.indentations.append(0)  # copium to prevent index out of range
         self.Variables.code = self.code.copy()
         self.Variables.code_done = []
 
@@ -47,11 +56,28 @@ class Compiler(Utils):
                         tempidscope[(pos_i, pos_j + pos_i)] = i
                     break
             current_id_level = i
+        self.Variables.code = [x.replace("\n","") for x in self.Variables.code]
         self.Variables.iterator = enumerate(self.Variables.code)
 
     def compile(self):
+        self.errors.clear()
+        if self.Variables.totalLineCount == 0:
+            return
+        self.compiling = True
+        _ , line = next(self.Variables.iterator)
+
+        if self.mode == "pc":
+            if line.replace(" ", "") != "#main":
+                print(line + "l")
+                print(line.replace(" ", "") + "l")
+                self.errors.append(Error("Missing #main at the beginning of the file", 0, 0, end_column=len(line)))
+        else:
+            if line.replace(" ", "") != "#board":
+                self.errors.append(Error("Missing #board at the beginning of the board part", 0, 0, end_column=len(line)))
+        self.Variables.inLoop = 0
         for self.Variables.currentLineIndex, line in self.Variables.iterator:
             self.Variables.code_done.append(self.do_line(line))
+        self.compiling = False
 
     def finish(self, connection_needed):
         self.Variables.code_done.append("}")
@@ -80,17 +106,46 @@ class Compiler(Utils):
             return "\n".join([open("../SerialCommunication/ArduinoSkripts/ArduinoSerial/ArduinoSerial.ino",
                                    "r").read()] + self.Variables.code_done)
         if connection_needed:
-            self.Variables.code_done.insert(0,"""#include "SerialCommunication/SerialPc.cpp"
-                                using namespace std;""")
+            self.Variables.code_done.insert(0, '#include "SerialCommunication/SerialPc.cpp|\nusing namespace std;')
         else:
-            self.Variables.code_done.insert(0, """#include <iostream>
-            using namespace std;""")
+            self.Variables.code_done.insert(0, "#include <iostream>\nusing namespace std;")
 
         if "delay" in self.Variables.builtins_needed:
-            self.Variables.code_done[0] +=  """\n#include <chrono>\n#include <thread>\nusing namespace std::chrono;\nusing namespace std::this_thread;\n"""
+            self.Variables.code_done[
+                0] += """\n#include <chrono>\n#include <thread>\nusing namespace std::chrono;\nusing namespace std::this_thread;\n"""
 
         if connection_needed:
-            self.Variables.code_done.insert(1,"int main(){ Arduino arduino = Arduino();")
+            self.Variables.code_done.insert(1, "int main(){ Arduino arduino = Arduino();")
         else:
-            self.Variables.code_done.insert(1,"int main(){")
+            self.Variables.code_done.insert(1, "int main(){")
         return "\n".join(self.Variables.code_done)
+
+    def get_completion(self, line, col):
+        while self.compiling:
+            pass
+
+
+    @staticmethod
+    def get_compiler(code: list):
+        code_pc = []
+        code_board = []
+        code = [i.replace("\n", "") for i in code]
+        if code[0].replace(" ", "") == "#main":
+            for i in range(len(code)):
+                if code[i].replace(" ", "") == "#board":
+                    code_pc = code[:i]
+                    code_board = code[i:]
+                    break
+            else:
+                code_pc = code
+        elif code[0].replace(" ", "") == "#board":
+            for i in range(len(code)):
+                if code[i].replace(" ", "") == "#main":
+                    code_board = code[:i]
+                    code_pc = code[i:]
+                    break
+                else:
+                    code_board = code
+        else:
+            code_pc = code.copy()
+        return Compiler(code_pc, "pc"), Compiler(code_board, "arduino")

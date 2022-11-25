@@ -69,7 +69,6 @@ def _validate(ls, params):
 
     source = text_doc.source
     print("validating",source)
-
     diagnostics = _validate_pyduino(source) if source else []
 
     ls.publish_diagnostics(text_doc.uri, diagnostics)
@@ -77,10 +76,11 @@ def _validate(ls, params):
 
 def _validate_pyduino(source):
     """Validates json file."""
-    compiler = Compiler(source.split("\n"),"pc")
-    compiler.compile()
-    
-    return [error.get_Diagnostic() for error in compiler.errors]
+    compiler_pc,compiler_board = Compiler.get_compiler(source.split("\n"))
+    compiler_pc.compile()
+    #compiler_board.compile()
+    print([str(error) for error in compiler_pc.errors])
+    return [error.get_Diagnostic() for error in compiler_pc.errors] # + [error.get_Diagnostic() for error in compiler_board.errors] 
   
 @json_server.feature(COMPLETION) # comment  , CompletionOptions(trigger_characters=[',']))
 def completions(ls,params: Optional[CompletionParams] = None) -> CompletionList:
@@ -123,8 +123,6 @@ async def count_down_10_seconds_non_blocking(ls, *args):
 @json_server.feature(TEXT_DOCUMENT_DID_CHANGE)
 def did_change(ls, params: DidChangeTextDocumentParams):
     """Text document did change notification."""
-    print("change",ls.workspace.get_document(params.text_document.uri).source)
-    print("enter validtae")
     _validate(ls, params)
 
 

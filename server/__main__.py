@@ -17,7 +17,7 @@
 import argparse
 import logging
 
-from .server import json_server
+from server.server import json_server
 
 logging.basicConfig(filename="pygls.log", level=logging.DEBUG, filemode="w")
 
