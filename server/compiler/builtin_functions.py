@@ -1,4 +1,4 @@
-from constants import Constants
+from server.compiler.constants import Constants
 
 class Builtins:
     def __init__(self, variables):

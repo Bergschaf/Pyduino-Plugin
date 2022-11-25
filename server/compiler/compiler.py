@@ -1,7 +1,7 @@
-from utils import Utils
-from builtin_functions import BuiltinsArduino, BuiltinsPC
-from constants import Constants
-from variables import Variables
+from server.compiler.utils import Utils
+from server.compiler.builtin_functions import BuiltinsArduino, BuiltinsPC
+from server.compiler.constants import Constants
+from server.compiler.variables import Variables
 
 
 class Compiler(Utils):
