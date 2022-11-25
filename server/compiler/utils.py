@@ -1,4 +1,4 @@
-from constants import Constants
+from server.compiler.constants import Constants
 
 
 class Utils:
@@ -298,7 +298,7 @@ class Utils:
         else:
             raise SyntaxError(f"Expected ':' at line {self.Variables.currentLineIndex} col {col_index}")
 
-    def do_value(self, value) -> (str, str):
+    def do_value(self, value):
         value = value.strip()
         if len(value) == 0:
             return "", None
