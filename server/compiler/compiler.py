@@ -23,7 +23,6 @@ class Compiler(Utils):
         self.code = code
         self.mode = mode
         self.compiling = False
-    
         self.intialize()
 
     def intialize(self):
@@ -68,7 +67,7 @@ class Compiler(Utils):
 
         if self.mode == "pc":
             if line.replace(" ", "") != "#main":
-                print(line + "l")
+                print(line)
                 print(line.replace(" ", "") + "l")
                 self.errors.append(Error("Missing #main at the beginning of the file", 0, 0, end_column=len(line)))
         else:
@@ -129,7 +128,7 @@ class Compiler(Utils):
     def get_compiler(code: list):
         code_pc = []
         code_board = []
-        code = [i.replace("\n", "") for i in code]
+        code = [i.replace("\n", "").replace("\r","") for i in code]
         if code[0].replace(" ", "") == "#main":
             for i in range(len(code)):
                 if code[i].replace(" ", "") == "#board":

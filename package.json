@@ -65,6 +65,13 @@
         ]
       }
     ],
+    "grammars": [
+      {
+        "language": "pyduino",
+        "scopeName": "source.pyduino",
+        "path": "./syntaxes/pyduino.tmGrammar.json"
+      }
+    ],
     "configuration": {
       "type": "object",
       "title": "Json Server Configuration",
