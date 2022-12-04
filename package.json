@@ -53,25 +53,17 @@
     "files.associations": {
       "*.pino": "pyduino"
     },
-    "languages": [
-      {
-        "id": "pyduino",
-        "extensions": [
-          ".pino"
-        ],
-        "aliases": [
-          "pyduino",
-          "pino"
-        ]
-      }
-    ],
-    "grammars": [
-      {
-        "language": "pyduino",
-        "scopeName": "source.pyduino",
-        "path": "./syntaxes/pyduino.tmGrammar.json"
-      }
-    ],
+    "languages": [{
+      "id": "pyduino",
+      "aliases": ["Pyduino", "pyduino"],
+      "extensions": [".pino"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "pyduino",
+      "scopeName": "source.pyduino",
+      "path": "./syntaxes/pyduino.tmLanguage.json"
+    }],
     "configuration": {
       "type": "object",
       "title": "Json Server Configuration",

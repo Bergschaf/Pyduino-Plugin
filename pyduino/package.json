@@ -1,6 +1,6 @@
 {
   "name": "pyduino",
-  "displayName": ".pino",
+  "displayName": "Pyduino",
   "description": "pyduino",
   "version": "0.0.1",
   "engines": {
@@ -12,7 +12,7 @@
   "contributes": {
     "languages": [{
       "id": "pyduino",
-      "aliases": ["pyduino", "pyduino"],
+      "aliases": ["Pyduino", "pyduino"],
       "extensions": [".pino"],
       "configuration": "./language-configuration.json"
     }],

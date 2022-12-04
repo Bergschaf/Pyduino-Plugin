@@ -94,6 +94,8 @@ class Utils:
         return args, kwargs
 
     def do_line(self, line):
+        self.Variables.currentLine = line
+        print("Current Line: |" + line + "|")
         instruction = line.strip()
         if instruction == "":
             return ""
@@ -106,7 +108,6 @@ class Utils:
         if instruction == "":
             return ""
         self.Variables.currentColumnIndex = line.index(instruction)
-        self.Variables.currentLine = line
         if instruction[0] == "#":
             return ""
         elif any([instruction.startswith(i) for i in

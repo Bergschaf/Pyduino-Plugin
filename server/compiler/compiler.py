@@ -25,6 +25,7 @@ class Compiler(Utils):
         self.compiling = False
         self.intialize()
 
+
     def intialize(self):
         """
         :param variables: Variables object

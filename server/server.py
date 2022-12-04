@@ -45,8 +45,7 @@ COUNT_DOWN_SLEEP_IN_SECONDS = 1
 
 
 class PyduinoLanguageServer(LanguageServer):
-    CMD_COUNT_DOWN_BLOCKING = 'countDownBlocking'
-    CMD_COUNT_DOWN_NON_BLOCKING = 'countDownNonBlocking'
+    RUN_PYDUINO = 'runPyduino'
     CMD_PROGRESS = 'progress'
     CMD_REGISTER_COMPLETIONS = 'registerCompletions'
     CMD_SHOW_CONFIGURATION_ASYNC = 'showConfigurationAsync'
@@ -63,20 +62,24 @@ class PyduinoLanguageServer(LanguageServer):
 
 json_server = PyduinoLanguageServer('pygls-pyduino-example', 'v0.1')
 
+def get_compiler(ls):
+    text_doc = ls.workspace.get_document(ls.workspace.documents.keys()[0])
+    source = text_doc.source
+    return Compiler.get_compiler(source.split("\n"))
+
 def _validate(ls, params):
 
     text_doc = ls.workspace.get_document(params.text_document.uri)
 
-    source = text_doc.source
-    print("validating",source)
-    diagnostics = _validate_pyduino(source) if source else []
+    diagnostics = _validate_pyduino(ls)
 
     ls.publish_diagnostics(text_doc.uri, diagnostics)
 
 
+
 def _validate_pyduino(source):
     """Validates json file."""
-    compiler_pc,compiler_board = Compiler.get_compiler(source.split("\n"))
+    compiler_pc,compiler_board = get_compiler
     compiler_pc.compile()
     #compiler_board.compile()
     print([str(error) for error in compiler_pc.errors])
@@ -98,26 +101,14 @@ def completions(ls,params: Optional[CompletionParams] = None) -> CompletionList:
     )
 
 
-@json_server.command(PyduinoLanguageServer.CMD_COUNT_DOWN_BLOCKING)
-def count_down_10_seconds_blocking(ls, *args):
+@json_server.command(PyduinoLanguageServer.RUN_PYDUINO)
+def runPyduino(ls, *args):
     """Starts counting down and showing message synchronously.
     It will `block` the main thread, which can be tested by trying to show
     completion items.
     """
-    for i in range(COUNT_DOWN_START_IN_SECONDS):
-        ls.show_message(f'Counting down... {COUNT_DOWN_START_IN_SECONDS - i}')
-        time.sleep(COUNT_DOWN_SLEEP_IN_SECONDS)
-
-
-@json_server.command(PyduinoLanguageServer.CMD_COUNT_DOWN_NON_BLOCKING)
-async def count_down_10_seconds_non_blocking(ls, *args):
-    """Starts counting down and showing message asynchronously.
-    It won't `block` the main thread, which can be tested by trying to show
-    completion items.
-    """
-    for i in range(COUNT_DOWN_START_IN_SECONDS):
-        ls.show_message(f'Counting down...Pyduino {COUNT_DOWN_START_IN_SECONDS - i}')
-        await asyncio.sleep(COUNT_DOWN_SLEEP_IN_SECONDS)
+    compiler_pc,compiler_board = get_compiler(ls)
+    error = compiler_pc.run()
 
 
 @json_server.feature(TEXT_DOCUMENT_DID_CHANGE)
