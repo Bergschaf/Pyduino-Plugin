@@ -1,6 +1,7 @@
 from server.compiler.constants import Constants
 from server.compiler.error import Error
 
+
 class Utils:
     def __init__(self, variables, builtins, errors):
         self.errors = errors
@@ -57,7 +58,7 @@ class Utils:
         self.errors.append(Error(f"No closing bracket found for '{bracket}'",
                                  self.Variables.currentLineIndex, self.Variables.currentLine.find(value)))
 
-    def do_arguments(self, argstring):
+    def do_arguments(self, argstring, after_col=0):
         """
         :param argstring: all arguments as a string WITHOUT the brackets
         :return: argument list, kwarg dictionary
@@ -82,8 +83,8 @@ class Utils:
             if "=" not in arg:
                 if kwargs:
                     self.errors.append(Error(f"Non-keyword argument '{arg}' after keyword argument",
-                                             self.Variables.currentLineIndex, self.Variables.currentLine.find(arg)))
-                    return -1
+                                             self.Variables.currentLineIndex,
+                                             self.Variables.currentLine.find(arg, after_col)))
 
                 args.append(self.do_value(arg))
             else:
@@ -95,7 +96,6 @@ class Utils:
 
     def do_line(self, line):
         self.Variables.currentLine = line
-        print("Current Line: |" + line + "|")
         instruction = line.strip()
         if instruction == "":
             return ""
@@ -107,7 +107,7 @@ class Utils:
             self.errors.append(Error(f"Indentation error", self.Variables.currentLineIndex, 0))
         if instruction == "":
             return ""
-        self.Variables.currentColumnIndex = line.index(instruction)
+        self.Variables.currentColumnIndex = line.find(instruction)
         if instruction[0] == "#":
             return ""
         elif any([instruction.startswith(i) for i in
@@ -137,11 +137,11 @@ class Utils:
     def check_function_definition(self, line):
         pass
 
-    def check_function_execution(self, value):
+    def check_function_execution(self, value, value_used=True):
         value = value.strip()
         if "(" not in value:
             return
-        first_bracket = value.index("(")
+        first_bracket = value.find("(")
         function_name = value[:first_bracket]
 
         second_bracket = self.find_closing_bracket_in_value(value, "(", first_bracket)
@@ -149,7 +149,7 @@ class Utils:
         # TODO was wenn , in arguemtns?
         args, kwargs = self.do_arguments(arguments)
         if (f := self.Builtins.check_builtin(function_name, args, kwargs)) is not None:
-            # and f[2]: TODO only let functions like cout through if the return value isn'T used
+            # and f[2]: TODO only let functions like cout through if the return value isn'T used  (value used kwarg)
             return f[0], f[1]
             #  TODO check if function is defined
 
@@ -227,7 +227,7 @@ class Utils:
         return f"{name} = {value};"
 
     def do_if(self, line):
-        col_index = line.index("if") + 2
+        col_index = line.find("if") + 2
         if line.strip()[-1] != ":":
             self.errors.append(
                 Error("Expected ':' after if", self.Variables.currentLineIndex, len(self.Variables.currentLine) - 1))
@@ -255,7 +255,7 @@ class Utils:
         return "\n".join(if_code)
 
     def do_while(self, line):
-        col_index = line.index("while") + 5
+        col_index = line.find("while") + 5
         if line.strip()[-1] != ":":
             self.errors.append(
                 Error("Expected ':' after while", self.Variables.currentLineIndex, len(self.Variables.currentLine) - 1))
@@ -285,7 +285,7 @@ class Utils:
         return "\n".join(if_code)
 
     def do_for(self, line):
-        col_index = line.index("for") + 3
+        col_index = line.find("for") + 3
         if line.strip()[-1] != ":":
             self.errors.append(
                 Error("Expected ':' after for", self.Variables.currentLineIndex, len(self.Variables.currentLine) - 1))
@@ -295,7 +295,7 @@ class Utils:
         dt = "int[]"
         if len(elements) != 2:
             self.errors.append(Error("Expected 'in' in for loop", self.Variables.currentLineIndex,
-                                     self.Variables.currentLine.index("for"),
+                                     self.Variables.currentLine.find("for"),
                                      end_column=len(self.Variables.currentLine)))
             return ""
 
@@ -320,19 +320,12 @@ class Utils:
                     range_arguments]):
                 self.errors.append(
                     Error("Expected int, short or long as argument in 'range'", self.Variables.currentLineIndex
-                          , self.Variables.currentLine.index("range") + 5,
+                          , self.Variables.currentLine.find("range") + 5,
                           end_column=len(self.Variables.currentLine) - 2))
                 return ""
             if len(range_kwargs) != 0:
                 self.errors.append(Error("Expected no keyword arguments in 'range'", self.Variables.currentLineIndex,
-                                         self.Variables.currentLine.index("range") + 5,
-                                         end_column=len(self.Variables.currentLine) - 2))
-                return ""
-            if len(range_arguments) == 1:
-                range_arguments.append(("0", "int"))
-            elif len(range_arguments) > 2:
-                self.errors.append(Error("Expected 1 or 2 arguments in 'range'", self.Variables.currentLineIndex,
-                                         self.Variables.currentLine.index("range") + 5,
+                                         self.Variables.currentLine.find("range") + 5,
                                          end_column=len(self.Variables.currentLine) - 2))
                 return ""
 
@@ -347,7 +340,7 @@ class Utils:
                     f"for (int {counter_variable} = {range_arguments[0][0]}; {counter_variable} < {range_arguments[1][0]} ; {counter_variable} += {range_arguments[2][0]}) {{"]
             else:
                 self.errors.append(Error("Expected 1 or 2 arguments in 'range'", self.Variables.currentLineIndex,
-                                         self.Variables.currentLine.index("range") + 5,
+                                         self.Variables.currentLine.find("range") + 5,
                                          end_column=len(self.Variables.currentLine) - 2))
                 for_code = []
         else:
@@ -359,7 +352,7 @@ class Utils:
                     f"auto {counter_variable} = {self.do_value(elements[1])[0]}[{sys_var}];"]
             else:
                 self.errors.append(Error("Expected 'range' or iterable after for", self.Variables.currentLineIndex,
-                                         self.Variables.currentLine.index("for"),
+                                         self.Variables.currentLine.find("for"),
                                          end_column=len(self.Variables.currentLine)))
                 for_code = []
         if dt != -1:
@@ -382,6 +375,51 @@ class Utils:
             return ""
         return line + ";"
 
+    def do_calculation(self, left, right, operator, after_col = 0):
+        if left[1] == "int" and right[1] == "int":
+            if (operator == "/" or operator == "//") and right[0] == "0":
+                self.errors.append(Error("Division by zero", self.Variables.currentLineIndex,
+                                         self.Variables.currentLine.find(left[0],after_col) + len(left[0]),
+                                         end_column=self.Variables.currentLine.find(right[0],after_col) + len(right[0])))
+                return "", "float"
+            if operator == "/":
+                return f"{left[0]} / {right[0]}", "float"
+            if operator == "%":
+                return f"fmod({left[0]}, {right[0]})", "float"
+            if operator == "//":
+                return f"floor({left[0]} / {right[0]}", "float"
+            if operator == "**":
+                return f"pow({left[0]}, {right[0]})", "float"
+            return f"{left[0]} {operator} {right[0]}", "int"
+        elif left[1] == "float" or right[1] == "float":
+            if (operator == "%" or operator == "//") and right[1] == "float":
+                self.errors.append(Error("Can't use floor division or modulo with float as second argument", self.Variables.currentLineIndex,
+                                         self.Variables.currentLine.find(right[0],after_col),
+                                         end_column=self.Variables.currentLine.find(right[0],after_col) + len(right[0])))
+                return "", "int"
+            if operator == "//":
+                return f"floor({left[0]} / {right[0]})", "int"
+            if operator == "%":
+                return f"fmod({left[0]}, {right[0]})", "float"
+            if operator == "**":
+                return f"pow({left[0]}, {right[0]})", "float"
+            return f"{left[0]} {operator} {right[0]}", "float"
+        elif left[1] == "str" and right[1] == "str":
+            if operator == "+":
+                return f"({left[0]} + {right[0]})", "str"
+            else:
+                self.errors.append(Error("Can't use operator on strings", self.Variables.currentLineIndex,
+                                         self.Variables.currentLine.find(left[0],after_col) + len(left[0]),
+                                         end_column=self.Variables.currentLine.find(right[0],after_col) + len(right[0])))
+                return "", "str"
+        self.errors.append(Error("Can't use operator on these types", self.Variables.currentLineIndex,
+                                 self.Variables.currentLine.find(left[0],after_col) + len(left[0]),
+                                 end_column=self.Variables.currentLine.find(right[0],after_col) + len(right[0])))
+        return "", None
+
+    def do_brackets(self, value):
+        pass
+
     def do_value(self, value, after_col=0):
         """
         :param after_col: value is the first occurence of the string value after this  column in the current line
@@ -394,12 +432,12 @@ class Utils:
 
         if value.count("'") % 2 == 1:
             self.errors.append(Error("Expected \"'\" after character", self.Variables.currentLineIndex,
-                                     self.Variables.currentLine.index(value, start=after_col),
+                                     self.Variables.currentLine.find(value,after_col),
                                      end_column=len(self.Variables.currentLine)))
             return "", -1
         if value.count('"') % 2 == 1:
             self.errors.append(Error("Expected '\"' after string", self.Variables.currentLineIndex,
-                                     self.Variables.currentLine.index(value, start=after_col),
+                                     self.Variables.currentLine.find(value, after_col),
                                      end_column=len(self.Variables.currentLine)))
             return "", -1
 
@@ -466,7 +504,7 @@ class Utils:
                 else:
                     return value, "int"
             self.errors.append(Error("Value is not a number", self.Variables.currentLineIndex,
-                                     self.Variables.currentLine.index(value),
+                                     self.Variables.currentLine.find(value),
                                      end_column=len(self.Variables.currentLine)))
             return "", -1
 
@@ -480,38 +518,38 @@ class Utils:
                 else:
                     return value, "int"
             self.errors.append(Error("Value is not a number", self.Variables.currentLineIndex,
-                                     self.Variables.currentLine.index(value, after_col),
+                                     self.Variables.currentLine.find(value, after_col),
                                      end_column=len(self.Variables.currentLine)))
             return "", -1
 
         elif "[" in value and value[-1] == "]":
-            start = value.index("[")
+            start = value.find("[")
             arg, dt = self.variable_in_scope(value[:start], self.Variables.currentLineIndex, after_col=after_col)
             if not dt:
                 self.errors.append(Error(f"Variable is not defined in this scope", self.Variables.currentLineIndex,
-                                         self.Variables.currentLine.index(value, after_col),
-                                         self.Variables.currentLine.index(value, after_col) + len(value)))
+                                         self.Variables.currentLine.find(value, after_col),
+                                         self.Variables.currentLine.find(value, after_col) + len(value)))
                 return "", -1
 
             if dt not in Constants.ITERABLES:
                 self.errors.append(Error(f"Can only get element out of iterable type, not out of '{dt}'",
                                          self.Variables.currentLineIndex,
-                                         self.Variables.currentLine.index(value, after_col),
-                                         end_column=len(value) + self.Variables.currentLine.index(value)))
+                                         self.Variables.currentLine.find(value, after_col),
+                                         end_column=len(value) + self.Variables.currentLine.find(value)))
                 return "", -1
 
             if dt in Constants.PRIMITIVE_ARRAY_TYPES:
                 index, dtid = self.do_value(value[start + 1:-1])
                 if dtid != "int":
                     self.errors.append(Error(f"Array Index must be int, not '{dtid}'", self.Variables.currentLineIndex,
-                                             self.Variables.currentLine.index(value, after_col),
-                                             end_column=len(value) + self.Variables.currentLine.index(value)))
+                                             self.Variables.currentLine.find(value, after_col),
+                                             end_column=len(value) + self.Variables.currentLine.find(value)))
                     return "", -1
                 return f"{arg}[{index}]", dt[:-2]
             else:
                 self.errors.append(Error("Iterable type not yet implemented", self.Variables.currentLineIndex,
-                                         self.Variables.currentLine.index(value, after_col),
-                                         end_column=len(value) + self.Variables.currentLine.index(value)))
+                                         self.Variables.currentLine.find(value, after_col),
+                                         end_column=len(value) + self.Variables.currentLine.find(value)))
 
         elif value == "True":
             return "true", "bool"
@@ -526,7 +564,7 @@ class Utils:
             return f[0], f[1]
         else:
             self.errors.append(Error("Value is not defined", self.Variables.currentLineIndex,
-                                     self.Variables.currentLine.index(value, after_col),
+                                     self.Variables.currentLine.find(value, after_col),
                                      end_column=len(self.Variables.currentLine)))
             return "", -1
 
@@ -542,7 +580,7 @@ class Utils:
         :return: (name, datatype) if variable is in scope, -1,-1 if there is an error
         """
         if "[" in name and name[-1] == "]":
-            start = name.index("[")
+            start = name.find("[")
             index = name[start + 1:-1]
             name = name[:start]
             _, dt = self.variable_in_scope(name, line_index, after_col=after_col)
@@ -551,16 +589,16 @@ class Utils:
             if dt not in Constants.ITERABLES:
                 self.errors.append(Error(f"Can only get element out of iterable type, not out of '{dt}'",
                                          self.Variables.currentLineIndex,
-                                         self.Variables.currentLine.index(name),
-                                         end_column=len(name) + self.Variables.currentLine.index(name)))
+                                         self.Variables.currentLine.find(name),
+                                         end_column=len(name) + self.Variables.currentLine.find(name)))
                 return "", None
             if dt in Constants.PRIMITIVE_ARRAY_TYPES:
                 _, dti = self.do_value(index)
                 if dti != "int":
                     self.errors.append(Error(f"Array Index must be int, not '{dti}'",
                                              self.Variables.currentLineIndex,
-                                             self.Variables.currentLine.index(name) + len(name),
-                                             end_column=len(name) + self.Variables.currentLine.index(name) + len(
+                                             self.Variables.currentLine.find(name) + len(name),
+                                             end_column=len(name) + self.Variables.currentLine.find(name) + len(
                                                  index)))
                     return "", None
                 return f"{name}[{index}]", dt[:-2]
@@ -583,20 +621,20 @@ class Utils:
         if not (value[0] == "[" and value[-1] == "]"):
             self.errors.append(Error("Array initializer must start with '[' and end with ']'",
                                      self.Variables.currentLineIndex,
-                                     self.Variables.currentLine.index(value),
-                                     end_column=len(value) + self.Variables.currentLine.index(value)))
+                                     self.Variables.currentLine.find(value),
+                                     end_column=len(value) + self.Variables.currentLine.find(value)))
             return "", -1
         args, kwargs = self.do_arguments(value[1:-1])
         if len(kwargs) != 0:
             self.errors.append(
                 Error(f"Array initializer can not have keyword arguments (= sign)",
-                      self.Variables.currentLineIndex, self.Variables.currentLine.index(value)))
+                      self.Variables.currentLineIndex, self.Variables.currentLine.find(value)))
             return -1
         dt = args[0][1]
         if any([x[1] != dt for x in args]):
             self.errors.append(
                 Error(f"Array initializer can not have different datatypes at line {self.Variables.currentLineIndex}",
-                      self.Variables.currentLineIndex, self.Variables.currentLine.index(value)))
+                      self.Variables.currentLineIndex, self.Variables.currentLine.find(value)))
             return "", -1
 
         return f"{{{', '.join([x[0] for x in args])}}}", dt

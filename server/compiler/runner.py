@@ -8,11 +8,11 @@ class Runner:
 
     def compile(self):
         if self.compiler_pc is not None and self.compiler_board is not None:
+            self.compiler_board.compile()
             self.compile_pc()
             self.compile_board()
         elif self.compiler_pc is not None:
             self.compile_pc()
-            self.connection_needed = self.compiler_pc.connection_needed
         elif self.compiler_board is not None:
             self.compile_board()
 
@@ -26,25 +26,30 @@ class Runner:
 
     def compile_pc(self):
         self.compiler_pc.compile()
-        code = self.compiler_pc.finish()
-        with open("temp.c", "w") as f:
+        if self.compiler_pc.errors:
+            raise Exception("Compiler error")
+        self.connection_needed = True if self.compiler_pc.Variables.connection_needed else self.connection_needed
+        code = self.compiler_pc.finish(self.connection_needed)
+        with open("temp.cpp", "w") as f:
             f.write(code)
-        subprocess.run(["gcc", "temp.c", "-o", "temp.exe"])
-        if self.compiler_pc.connection_needed:
-            self.connection_needed = True
+        subprocess.run(["g++", "temp.cpp", "-o", "temp.exe"])
 
     def run_pc(self):
-        # get the output in the vscode terminal
-        subprocess.run(["cmd", "/c", "start", "temp.exe"], shell=True)
+        # show the output in the vscode terminal
+        subprocess.Popen("temp.exe")
+        print("code: " , self.compiler_pc.Variables.code)
+        print("--- Program started ---")
 
     def compile_board(self):
         self.compiler_board.compile()
-        code = self.compiler_board.finish()
+        if self.compiler_board.errors:
+            raise Exception("Compiler error")
+        self.connection_needed = True if self.compiler_board.Variables.connection_needed else self.connection_needed
+        code = self.compiler_board.finish(self.connection_needed)
         with open("temp.ino", "w") as f:
             f.write(code)
         subprocess.run(["arduino-cli", "compile", "-b", "arduino:avr:uno", "--fqbn", "arduino:avr:uno", "temp.ino"])
-        if self.compiler_board.connection_needed:
-            self.connection_needed = True
+
 
     def run_board(self):
         subprocess.run(["arduino-cli", "upload", "-b", "arduino:avr:uno", "--fqbn", "arduino:avr:uno", "temp.ino"])
@@ -54,6 +59,7 @@ class Runner:
 
 if __name__ == '__main__':
     from compiler import Compiler
-    c = Compiler(['print("Helllo World")'], "arduino")
+    c = Compiler(["#main",'print("Helllo World")','print("Hello")',"delay(10000)"], "pc")
     r = Runner(c, None)
     r.run()
+    r.stop()

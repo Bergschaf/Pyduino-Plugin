@@ -21,8 +21,8 @@ import uuid
 from typing import Optional
 
 from pygls.lsp.methods import (COMPLETION, TEXT_DOCUMENT_DID_CHANGE,
-                               TEXT_DOCUMENT_DID_CLOSE, TEXT_DOCUMENT_DID_OPEN, 
-                               TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL,TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS)
+                               TEXT_DOCUMENT_DID_CLOSE, TEXT_DOCUMENT_DID_OPEN,
+                               TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL, TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS)
 from pygls.lsp.types import (CompletionItem, CompletionList, CompletionOptions,
                              CompletionParams, ConfigurationItem,
                              ConfigurationParams, Diagnostic,
@@ -32,12 +32,14 @@ from pygls.lsp.types import (CompletionItem, CompletionList, CompletionOptions,
                              Range, Registration, RegistrationParams,
                              SemanticTokens, SemanticTokensLegend, SemanticTokensParams,
                              Unregistration, UnregistrationParams)
-from pygls.lsp.types.basic_structures import (WorkDoneProgressBegin, 
+from pygls.lsp.types.basic_structures import (WorkDoneProgressBegin,
                                               WorkDoneProgressEnd,
                                               WorkDoneProgressReport)
 from pygls.server import LanguageServer
 
 from server.compiler.compiler import Compiler
+from server.compiler.runner import Runner
+
 print("Starting server...")
 
 COUNT_DOWN_START_IN_SECONDS = 10
@@ -45,14 +47,15 @@ COUNT_DOWN_SLEEP_IN_SECONDS = 1
 
 
 class PyduinoLanguageServer(LanguageServer):
+    runner = None
     RUN_PYDUINO = 'runPyduino'
+    STOP_PYDUINO = 'stopPyduino'
     CMD_PROGRESS = 'progress'
     CMD_REGISTER_COMPLETIONS = 'registerCompletions'
     CMD_SHOW_CONFIGURATION_ASYNC = 'showConfigurationAsync'
     CMD_SHOW_CONFIGURATION_CALLBACK = 'showConfigurationCallback'
     CMD_SHOW_CONFIGURATION_THREAD = 'showConfigurationThread'
     CMD_UNREGISTER_COMPLETIONS = 'unregisterCompletions'
-
 
     CONFIGURATION_SECTION = 'pyduinoServer'
 
@@ -62,13 +65,14 @@ class PyduinoLanguageServer(LanguageServer):
 
 json_server = PyduinoLanguageServer('pygls-pyduino-example', 'v0.1')
 
+
 def get_compiler(ls):
-    text_doc = ls.workspace.get_document(ls.workspace.documents.keys()[0])
+    text_doc = ls.workspace.get_document(list(ls.workspace.documents.keys())[0])
     source = text_doc.source
     return Compiler.get_compiler(source.split("\n"))
 
-def _validate(ls, params):
 
+def _validate(ls, params):
     text_doc = ls.workspace.get_document(params.text_document.uri)
 
     diagnostics = _validate_pyduino(ls)
@@ -76,17 +80,18 @@ def _validate(ls, params):
     ls.publish_diagnostics(text_doc.uri, diagnostics)
 
 
-
 def _validate_pyduino(source):
     """Validates json file."""
-    compiler_pc,compiler_board = get_compiler
+    compiler_pc, compiler_board = get_compiler(source)
     compiler_pc.compile()
-    #compiler_board.compile()
+    # compiler_board.compile()
     print([str(error) for error in compiler_pc.errors])
-    return [error.get_Diagnostic() for error in compiler_pc.errors] # + [error.get_Diagnostic() for error in compiler_board.errors] 
-  
-@json_server.feature(COMPLETION) # comment  , CompletionOptions(trigger_characters=[',']))
-def completions(ls,params: Optional[CompletionParams] = None) -> CompletionList:
+    return [error.get_Diagnostic() for error in
+            compiler_pc.errors]  # + [error.get_Diagnostic() for error in compiler_board.errors]
+
+
+@json_server.feature(COMPLETION)  # comment  , CompletionOptions(trigger_characters=[',']))
+def completions(ls, params: Optional[CompletionParams] = None) -> CompletionList:
     print("complete")
     """Returns completion items."""
     return CompletionList(
@@ -103,12 +108,19 @@ def completions(ls,params: Optional[CompletionParams] = None) -> CompletionList:
 
 @json_server.command(PyduinoLanguageServer.RUN_PYDUINO)
 def runPyduino(ls, *args):
-    """Starts counting down and showing message synchronously.
-    It will `block` the main thread, which can be tested by trying to show
-    completion items.
-    """
-    compiler_pc,compiler_board = get_compiler(ls)
-    error = compiler_pc.run()
+    compiler_pc, compiler_board = get_compiler(ls)
+    PyduinoLanguageServer.runner = Runner(compiler_pc, compiler_board)
+    try:
+        PyduinoLanguageServer.runner.run()
+    except Exception as e:
+        print(e)
+        PyduinoLanguageServer.runner = None
+
+@json_server.command(PyduinoLanguageServer.STOP_PYDUINO)
+def stopPyduino(ls, *args):
+    if PyduinoLanguageServer.runner:
+        PyduinoLanguageServer.runner.stop()
+        PyduinoLanguageServer.runner = None
 
 
 @json_server.feature(TEXT_DOCUMENT_DID_CHANGE)
@@ -133,16 +145,16 @@ async def did_open(ls, params: DidOpenTextDocumentParams):
 @json_server.feature(
     TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL,
     SemanticTokensLegend(
-        token_types = ["operator"],
-        token_modifiers = []
+        token_types=["operator"],
+        token_modifiers=[]
     )
 )
 def semantic_tokens(ls: PyduinoLanguageServer, params: SemanticTokensParams):
     """See https://microsoft.github.io/language-server-protocol/specification#textDocument_semanticTokens
     for details on how semantic tokens are encoded."""
-    
+
     TOKENS = re.compile('".*"(?=:)')
-    
+
     uri = params.text_document.uri
     doc = ls.workspace.get_document(uri)
 
@@ -160,7 +172,7 @@ def semantic_tokens(ls: PyduinoLanguageServer, params: SemanticTokensParams):
                 (lineno - last_line),
                 (start - last_start),
                 (end - start),
-                0, 
+                0,
                 0
             ]
 
@@ -168,7 +180,6 @@ def semantic_tokens(ls: PyduinoLanguageServer, params: SemanticTokensParams):
             last_start = start
 
     return SemanticTokens(data=data)
-
 
 
 @json_server.command(PyduinoLanguageServer.CMD_PROGRESS)
@@ -183,7 +194,7 @@ async def progress(ls: PyduinoLanguageServer, *args):
     for i in range(1, 10):
         ls.progress.report(
             token,
-            WorkDoneProgressReport(message=f'{i * 10}%', percentage= i * 10),
+            WorkDoneProgressReport(message=f'{i * 10}%', percentage=i * 10),
         )
         await asyncio.sleep(2)
     # End
@@ -194,11 +205,11 @@ async def progress(ls: PyduinoLanguageServer, *args):
 async def register_completions(ls: PyduinoLanguageServer, *args):
     """Register completions method on the client."""
     params = RegistrationParams(registrations=[
-                Registration(
-                    id=str(uuid.uuid4()),
-                    method=COMPLETION,
-                    register_options={"triggerCharacters": "[':']"})
-             ])
+        Registration(
+            id=str(uuid.uuid4()),
+            method=COMPLETION,
+            register_options={"triggerCharacters": "[':']"})
+    ])
     response = await ls.register_capability_async(params)
     if response is None:
         ls.show_message('Successfully registered completions method')
@@ -216,7 +227,7 @@ async def show_configuration_async(ls: PyduinoLanguageServer, *args):
                 ConfigurationItem(
                     scope_uri='',
                     section=PyduinoLanguageServer.CONFIGURATION_SECTION)
-        ]))
+            ]))
 
         example_config = config[0].get('exampleConfiguration')
 
@@ -229,6 +240,7 @@ async def show_configuration_async(ls: PyduinoLanguageServer, *args):
 @json_server.command(PyduinoLanguageServer.CMD_SHOW_CONFIGURATION_CALLBACK)
 def show_configuration_callback(ls: PyduinoLanguageServer, *args):
     """Gets exampleConfiguration from the client settings using callback."""
+
     def _config_callback(config):
         try:
             example_config = config[0].get('exampleConfiguration')
@@ -276,4 +288,3 @@ async def unregister_completions(ls: PyduinoLanguageServer, *args):
     else:
         ls.show_message('Error happened during completions unregistration.',
                         MessageType.Error)
-

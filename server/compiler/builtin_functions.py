@@ -44,7 +44,7 @@ class Builtins:
                                                 + len(arg)))
             return "", True
         if dt in Constants.PRIMITIVE_ARRAY_TYPES:
-            return f"sizeof({arg}) / sizeof({arg}[0])", True
+            return f"sizeof({arg}) / sizeof({arg}[0])", "int", True
 
 
 class BuiltinsArduino(Builtins):

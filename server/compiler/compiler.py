@@ -80,6 +80,7 @@ class Compiler(Utils):
         self.compiling = False
 
     def finish(self, connection_needed):
+
         self.Variables.code_done.append("}")
         if self.mode == "arduino":
             self.Variables.code_done.insert(0, "void setup(){")
@@ -105,19 +106,25 @@ class Compiler(Utils):
                 self.Variables.code_done.append("void loop() {}")
             return "\n".join([open("../SerialCommunication/ArduinoSkripts/ArduinoSerial/ArduinoSerial.ino",
                                    "r").read()] + self.Variables.code_done)
+        included = ["#include <iostream>"]
+        namespaces = ["using namespace std;"]
         if connection_needed:
-            self.Variables.code_done.insert(0, '#include "SerialCommunication/SerialPc.cpp|\nusing namespace std;')
-        else:
-            self.Variables.code_done.insert(0, "#include <iostream>\nusing namespace std;")
+            included.append('#include "SerialCommunication/SerialPc.cpp"')
 
         if "delay" in self.Variables.builtins_needed:
-            self.Variables.code_done[
-                0] += """\n#include <chrono>\n#include <thread>\nusing namespace std::chrono;\nusing namespace std::this_thread;\n"""
+
+            included.append('#include <chrono>')
+            included.append('#include <thread>')
+            namespaces.append("using namespace std::chrono;")
+            namespaces.append("using namespace std::this_thread;")
+
 
         if connection_needed:
-            self.Variables.code_done.insert(1, "int main(){ Arduino arduino = Arduino();")
+            self.Variables.code_done.insert(0, "int main(){ Arduino arduino = Arduino();")
         else:
-            self.Variables.code_done.insert(1, "int main(){")
+            self.Variables.code_done.insert(0, "int main(){")
+
+        self.Variables.code_done = included + namespaces + self.Variables.code_done
         return "\n".join(self.Variables.code_done)
 
     def get_completion(self, line, col):
@@ -148,4 +155,9 @@ class Compiler(Utils):
                     code_board = code
         else:
             code_pc = code.copy()
-        return Compiler(code_pc, "pc"), Compiler(code_board, "arduino")
+        if code_board == []:
+            return Compiler(code_pc, "pc"), None
+        if code_pc == []:
+            return None, Compiler(code_board, "arduino")
+        else:
+            return Compiler(code_pc, "pc"), Compiler(code_board, "arduino")

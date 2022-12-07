@@ -18,12 +18,12 @@
   "contributes": {
     "commands": [
       {
-        "command": "countDownBlocking",
-        "title": "Count down 10 seconds [Blocking]"
+        "command": "runPyduino",
+        "title": "run pyduino"
       },
       {
-        "command": "countDownNonBlocking",
-        "title": "Count down 10 seconds [Non Blocking]"
+        "command": "stopPyduino",
+        "title": "stop pyduino"
       },
       {
         "command": "progress",
