@@ -59,7 +59,10 @@ class Runner:
 
 if __name__ == '__main__':
     from compiler import Compiler
-    c = Compiler(["#main",'print("Helllo World")','print("Hello")',"delay(10000)"], "pc")
-    r = Runner(c, None)
-    r.run()
-    r.stop()
+    c = Compiler(["#main","int i = (2+2)+2"], "pc")
+    #r = Runner(c, None)
+    #r.run()
+    #r.stop()
+    c.compile()
+    print(c.finish(False))
+

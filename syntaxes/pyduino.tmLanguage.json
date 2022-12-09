@@ -1,0 +1,62 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "Pyduino",
+	"patterns": [
+		{
+			"include": "#keywords"
+		},
+		{
+			"include": "#strings"
+		}
+	],
+	"repository": {
+		"keywords": {
+			"patterns": [{
+				"name": "keyword.control.pyduino",
+				"match": "\\b(if|elif|else|while|for|return|continue|break|in)\\b"
+			},
+			{
+				"name": "keyword.operator.pyduino",
+				"match": "\\b(and|or|not)\\b"  
+			},
+			{
+				"name": "keyword.other.pyduino",
+				"match": "\\b(True|False|None)\\b"
+			},
+			{
+				"name": "storage.type.pyduino",
+				"match": "\\b(int|float|def)\\b"
+			},
+			{
+				"name":"constant.numeric.pyduino",
+				"match":"\\b(\\d+)\\b"
+			},
+			
+			
+			{
+				"name": "support.function.builtin.pyduino.arduino",
+			    "match": "\\b(print|analogWrite|analogRead|digitalWrite|digitalRead|delay)\\b"
+			},
+			{
+				"name": "support.function.builtin.pyduino.general",
+				"match": "\\b(len|sum|range)\\b"
+			}
+			
+			]
+			
+			
+		},
+		"strings": {
+			"name": "string.quoted.double.pyduino",
+			"begin": "\"",
+			"end": "\"",
+			"patterns": [
+				{
+					"name": "constant.character.escape.pyduino",
+					"match": "\\\\."
+				}
+			]
+		}
+	},
+	"scopeName": "source.pyduino"
+}

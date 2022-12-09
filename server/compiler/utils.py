@@ -375,15 +375,21 @@ class Utils:
             return ""
         return line + ";"
 
-    def do_calculation(self, left, right, operator, after_col = 0):
-        if left[1] == "int" and right[1] == "int":
+    def do_calculation(self, left, right, operator, after_col=0):
+        if operator[1] != "operator":
+            self.errors.append(Error(f"Expected operator, got {operator[0]}", self.Variables.currentLineIndex,
+                                     self.Variables.currentLine.find(operator[0],after_col)))
+        operator = operator[0]
+
+        if left[1] == "int" and right[1] == "int" and operator in Constants.ARITHMETIC_OPERATORS:
             if (operator == "/" or operator == "//") and right[0] == "0":
                 self.errors.append(Error("Division by zero", self.Variables.currentLineIndex,
-                                         self.Variables.currentLine.find(left[0],after_col) + len(left[0]),
-                                         end_column=self.Variables.currentLine.find(right[0],after_col) + len(right[0])))
+                                         self.Variables.currentLine.find(left[0], after_col) + len(left[0]),
+                                         end_column=self.Variables.currentLine.find(right[0], after_col) + len(
+                                             right[0])))
                 return "", "float"
             if operator == "/":
-                return f"{left[0]} / {right[0]}", "float"
+                return f"({left[0]} / {right[0]})", "float"
             if operator == "%":
                 return f"fmod({left[0]}, {right[0]})", "float"
             if operator == "//":
@@ -391,11 +397,13 @@ class Utils:
             if operator == "**":
                 return f"pow({left[0]}, {right[0]})", "float"
             return f"{left[0]} {operator} {right[0]}", "int"
-        elif left[1] == "float" or right[1] == "float":
+        elif left[1] == "float" or right[1] == "float" and operator in Constants.ARITHMETIC_OPERATORS:
             if (operator == "%" or operator == "//") and right[1] == "float":
-                self.errors.append(Error("Can't use floor division or modulo with float as second argument", self.Variables.currentLineIndex,
-                                         self.Variables.currentLine.find(right[0],after_col),
-                                         end_column=self.Variables.currentLine.find(right[0],after_col) + len(right[0])))
+                self.errors.append(Error("Can't use floor division or modulo with float as second argument",
+                                         self.Variables.currentLineIndex,
+                                         self.Variables.currentLine.find(right[0], after_col),
+                                         end_column=self.Variables.currentLine.find(right[0], after_col) + len(
+                                             right[0])))
                 return "", "int"
             if operator == "//":
                 return f"floor({left[0]} / {right[0]})", "int"
@@ -409,16 +417,25 @@ class Utils:
                 return f"({left[0]} + {right[0]})", "str"
             else:
                 self.errors.append(Error("Can't use operator on strings", self.Variables.currentLineIndex,
-                                         self.Variables.currentLine.find(left[0],after_col) + len(left[0]),
-                                         end_column=self.Variables.currentLine.find(right[0],after_col) + len(right[0])))
+                                         self.Variables.currentLine.find(left[0], after_col) + len(left[0]),
+                                         end_column=self.Variables.currentLine.find(right[0], after_col) + len(
+                                             right[0])))
                 return "", "str"
+        elif left[1] == "bool" and right[1] == "bool":
+            if operator == "and":
+                return f"({left[0]} && {right[0]})", "bool"
+            if operator == "or":
+                return f"({left[0]} || {right[0]})", "bool"
+            else:
+                self.errors.append(Error("Can't use operator on booleans", self.Variables.currentLineIndex,
+                                         self.Variables.currentLine.find(left[0], after_col) + len(left[0]),
+                                         end_column=self.Variables.currentLine.find(right[0], after_col) + len(
+                                             right[0])))
+            return "", "bool"
         self.errors.append(Error("Can't use operator on these types", self.Variables.currentLineIndex,
-                                 self.Variables.currentLine.find(left[0],after_col) + len(left[0]),
-                                 end_column=self.Variables.currentLine.find(right[0],after_col) + len(right[0])))
+                                 self.Variables.currentLine.find(left[0], after_col) + len(left[0]),
+                                 end_column=self.Variables.currentLine.find(right[0], after_col) + len(right[0])))
         return "", None
-
-    def do_brackets(self, value):
-        pass
 
     def do_value(self, value, after_col=0):
         """
@@ -432,7 +449,7 @@ class Utils:
 
         if value.count("'") % 2 == 1:
             self.errors.append(Error("Expected \"'\" after character", self.Variables.currentLineIndex,
-                                     self.Variables.currentLine.find(value,after_col),
+                                     self.Variables.currentLine.find(value, after_col),
                                      end_column=len(self.Variables.currentLine)))
             return "", -1
         if value.count('"') % 2 == 1:
@@ -448,7 +465,7 @@ class Utils:
             if value[-1] == "'" and len(value) == 3:
                 return value, "char"
 
-        value = value.strip()
+        value = value.replace(" ", "")
         valueList = []
         last_function_end = 0
         for i in range(len(value) - 1):
@@ -464,6 +481,7 @@ class Utils:
                 valueList.append(self.do_value(value[last_function_end:start_col]))
                 valueList.append(self.check_function_execution(value[start_col:end_col + 1]))
                 last_function_end = end_col + 1
+
         if len(valueList) > 0:
             valueList.append(self.do_value(value[last_function_end:]))
             # TODO return datatype here
@@ -472,27 +490,28 @@ class Utils:
             return "", -1
 
         # TODO split by operators
-
         lastsplit = 0
+        print("lenvalue:  ", len(value))
         for i in range(len(value) - 1):
+            print("i: ", i)
             # check if the value is and with whitespace aroud it
-            if value[i] == " " and value[i + 1] != " ":
-                if value[lastsplit:i].strip() in Constants.OPERATORS + ["and", "or", "not"]:
-                    if value[lastsplit:i].strip() == "and":
-                        valueList.append("&&")
-                    elif value[lastsplit:i].strip() == "or":
-                        valueList.append("||")
-                    elif value[lastsplit:i].strip() == "not":
-                        valueList.append("!")
-                    else:
-                        valueList.append(value[lastsplit:i])
-                    lastsplit = i + 1
-                else:
-                    valueList.append(self.do_value(value[lastsplit:i]))
-                    lastsplit = i + 1
+            if value[i] in Constants.CONDITION_OPERATORS_LEN1 + Constants.ARITHMETIC_OPERATORS_LEN1 + ["(", ")"]:
+                valueList.append(self.do_value(value[lastsplit:i]))
+                valueList.append((value[i], "operator"))
+                lastsplit = i + 1
+            elif value[i:i + 2] in Constants.CONDITION_OPERATORS_LEN2 + Constants.ARITHMETIC_OPERATORS_LEN2:
+                valueList.append(self.do_value(value[lastsplit:i]))
+                valueList.append((value[i:i + 2], "operator"))
+                lastsplit = i + 2
+
         if len(valueList) > 0:
             valueList.append(self.do_value(value[lastsplit:]))
-            return "".join([x[0] for x in valueList]), valueList[-1][1]
+            res = valueList[0]
+            dt = None
+            for i in range(1, len(valueList) - 1, 2):
+                print("res: ", res, "value: ", valueList[i + 1], "operator: ", valueList[i])
+                res, dt = self.do_calculation(res, valueList[i+1], valueList[i])
+            return res, dt
 
         if value[0] in Constants.NUMBERS:
             for i in range(len(value)):
