@@ -12,8 +12,8 @@ class Constants:
 
     PRIMITIVE_TYPES = ["int", "float", "char", "bool"]
     PRIMITIVE_ARRAY_TYPES = ["int[]", "float[]", "char[]", "bool[]"]
-    PRIMITIVE_LIST_TYPES = ["list<int>", "list<float>", "list<char>", "list<bool>","list<byte>", "list<long>", "list<double>", "list<short>"]
-    ITERABLES = PRIMITIVE_ARRAY_TYPES + PRIMITIVE_LIST_TYPES
+    NUMERIC_TYPES = ["int", "float"]
+    ITERABLES = PRIMITIVE_ARRAY_TYPES
 
     NUMBERS = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
     ARITHMETIC_OPERATORS = ["+", "-", "*", "/", "%", "**", "//"]
@@ -22,7 +22,10 @@ class Constants:
 
     CONDITION_OPERATORS_LEN1 = ["<", ">"]
     CONDITION_OPERATORS_LEN2 = ["==", "!=", "<=", ">=", "&&", "||"]
+    BOOLEAN_OPERATORS = ["&&", "||"]
     COMPAIRSON = ["<", ">", "==", "!=", "<=", ">="]
+    OPERATION_ORDER = [("**"), ("*", "/", "%", "//"), ("+", "-"), ("==", "!=", "<=", ">=", "<", ">"), ("&&", "||")]
+
 
     OPERATORS = ARITHMETIC_OPERATORS + CONDITION_OPERATORS_LEN1 + CONDITION_OPERATORS_LEN2
 
@@ -31,3 +34,8 @@ class Constants:
     WHITESPACE = '" "'
 
     ALL_SYNTAX_ELEMENTS = OPERATORS + CONDITION_CONDITIONS + BRACKETS
+
+    BUITLIN_FUNCTIONS = [("print", ("*all"), None), ("delay", ("int"), None),
+                         ("analogWrite", ("int", "int"), None), ("digitalWrite", ("int", "int"), None),
+                         ("analogRead", ("int"), "int"), ("digitalRead", ("int"), "int"),
+                         ("len",("iterable"),"int")] # (name, (arg, arg, ...), return)

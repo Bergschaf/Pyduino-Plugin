@@ -188,7 +188,9 @@ class BuiltinsPC(Builtins):
             if dt in Constants.PRIMITIVE_ARRAY_TYPES:
 
                 if lastsplit < i: res.append(f"cout << {space.join(a[0] for a in args[lastsplit:i])};")
-                res.append(f"for (int i = 0; i < sizeof({arg}) / sizeof({arg}[0]); i++) cout << {arg}[i] << ' ';")
+                sys_var = self.next_sys_variable()
+                res.append(f"cout << '[';\nfor (int {sys_var} = 0; {sys_var} < sizeof({arg}) / sizeof({arg}[0]) - 1; {sys_var}++){{ cout << {arg}[{sys_var}] << ',' << ' ';}}")
+                res.append(f"cout << {arg}[sizeof({arg}) / sizeof({arg}[0])-1] << ']';")
                 lastsplit = i + 1
 
         if lastsplit < len(args): res.append(f"cout << {space.join(a[0] for a in args[lastsplit:])};")

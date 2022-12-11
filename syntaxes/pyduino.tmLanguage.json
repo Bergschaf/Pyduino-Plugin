@@ -13,10 +13,10 @@
 		"keywords": {
 			"patterns": [{
 				"name": "keyword.control.pyduino",
-				"match": "\\b(if|elif|else|while|for|return|continue|break|in)\\b"
+				"match": "\\b(if|elif|else|while|for|return|continue|break|in|and|or|not)\\b"
 			},
 			{
-				"name": "keyword.operator.pyduino",
+				"name": "keyword.operator.logical.pyduino",
 				"match": "\\b(and|or|not)\\b"  
 			},
 			{
@@ -31,6 +31,7 @@
 				"name":"constant.numeric.pyduino",
 				"match":"\\b(\\d+)\\b"
 			},
+
 			
 			
 			{

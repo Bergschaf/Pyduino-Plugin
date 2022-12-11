@@ -80,7 +80,7 @@ class Utils:
         all_args.append(argstring[last_split:])
         for arg in all_args:
             arg = arg.strip()
-            if "=" not in arg:
+            if " = " not in arg: # TODO accept kwargs if = is without spaces
                 if kwargs:
                     self.errors.append(Error(f"Non-keyword argument '{arg}' after keyword argument",
                                              self.Variables.currentLineIndex,
@@ -117,7 +117,7 @@ class Utils:
             else:
                 return self.do_variable_definition(instruction)
         elif (f := self.check_function_execution(instruction)) is not None:
-            return f[0] + ";"
+            return f[0]
         elif instruction[:2] == "if":
             return self.do_if(instruction)
         elif instruction[:5] == "while":
@@ -228,6 +228,7 @@ class Utils:
 
     def do_if(self, line):
         col_index = line.find("if") + 2
+    
         if line.strip()[-1] != ":":
             self.errors.append(
                 Error("Expected ':' after if", self.Variables.currentLineIndex, len(self.Variables.currentLine) - 1))
@@ -375,10 +376,17 @@ class Utils:
             return ""
         return line + ";"
 
-    def do_calculation(self, left, right, operator, after_col=0):
+    def do_operation(self, left, right, operator, after_col=0):
         if operator[1] != "operator":
             self.errors.append(Error(f"Expected operator, got {operator[0]}", self.Variables.currentLineIndex,
-                                     self.Variables.currentLine.find(operator[0],after_col)))
+                                     self.Variables.currentLine.find(operator[0], after_col)))
+
+        if operator[0] in Constants.COMPAIRSON:
+            if left[1] in Constants.NUMERIC_TYPES and right[1] in Constants.NUMERIC_TYPES:
+                return f"({left[0]} {operator[0]} {right[0]})", "bool"
+            else:
+                self.errors.append(Error(f"Expected numeric types, got {left[1]} and {right[1]}", self.Variables.currentLineIndex,
+                                         self.Variables.currentLine.find(operator[0], after_col)))
         operator = operator[0]
 
         if left[1] == "int" and right[1] == "int" and operator in Constants.ARITHMETIC_OPERATORS:
@@ -389,11 +397,9 @@ class Utils:
                                              right[0])))
                 return "", "float"
             if operator == "/":
-                return f"({left[0]} / {right[0]})", "float"
-            if operator == "%":
-                return f"fmod({left[0]}, {right[0]})", "float"
+                return f"((float){left[0]} / (float){right[0]})", "float"
             if operator == "//":
-                return f"floor({left[0]} / {right[0]}", "float"
+                return f"{left[0]} / {right[0]}", "int"
             if operator == "**":
                 return f"pow({left[0]}, {right[0]})", "float"
             return f"{left[0]} {operator} {right[0]}", "int"
@@ -407,25 +413,13 @@ class Utils:
                 return "", "int"
             if operator == "//":
                 return f"floor({left[0]} / {right[0]})", "int"
-            if operator == "%":
-                return f"fmod({left[0]}, {right[0]})", "float"
             if operator == "**":
                 return f"pow({left[0]}, {right[0]})", "float"
-            return f"{left[0]} {operator} {right[0]}", "float"
-        elif left[1] == "str" and right[1] == "str":
-            if operator == "+":
-                return f"({left[0]} + {right[0]})", "str"
-            else:
-                self.errors.append(Error("Can't use operator on strings", self.Variables.currentLineIndex,
-                                         self.Variables.currentLine.find(left[0], after_col) + len(left[0]),
-                                         end_column=self.Variables.currentLine.find(right[0], after_col) + len(
-                                             right[0])))
-                return "", "str"
+            return f"(float){left[0]} {operator} (float){right[0]}", "float"
+
         elif left[1] == "bool" and right[1] == "bool":
-            if operator == "and":
-                return f"({left[0]} && {right[0]})", "bool"
-            if operator == "or":
-                return f"({left[0]} || {right[0]})", "bool"
+            if operator in Constants.BOOLEAN_OPERATORS:
+                return f"({left[0]} {operator} {right[0]})", "bool"
             else:
                 self.errors.append(Error("Can't use operator on booleans", self.Variables.currentLineIndex,
                                          self.Variables.currentLine.find(left[0], after_col) + len(left[0]),
@@ -444,6 +438,7 @@ class Utils:
         :return: "",-1 if there is an error
         """
         value = value.strip()
+
         if len(value) == 0:
             return "", None
 
@@ -465,6 +460,9 @@ class Utils:
             if value[-1] == "'" and len(value) == 3:
                 return value, "char"
 
+        value = value.replace(" and ", "&&")
+        value = value.replace(" or ", "||")
+        value = value.replace(" not ", "!")
         value = value.replace(" ", "")
         valueList = []
         last_function_end = 0
@@ -489,29 +487,60 @@ class Utils:
                 return " ".join([x[0] for x in valueList]), valueList[0][1]
             return "", -1
 
-        # TODO split by operators
         lastsplit = 0
-        print("lenvalue:  ", len(value))
-        for i in range(len(value) - 1):
-            print("i: ", i)
-            # check if the value is and with whitespace aroud it
-            if value[i] in Constants.CONDITION_OPERATORS_LEN1 + Constants.ARITHMETIC_OPERATORS_LEN1 + ["(", ")"]:
-                valueList.append(self.do_value(value[lastsplit:i]))
-                valueList.append((value[i], "operator"))
-                lastsplit = i + 1
-            elif value[i:i + 2] in Constants.CONDITION_OPERATORS_LEN2 + Constants.ARITHMETIC_OPERATORS_LEN2:
-                valueList.append(self.do_value(value[lastsplit:i]))
+        iterator = iter(range(len(value)))
+        for i in iterator:
+            if i+2 < len(value) and value[i:i + 2] in Constants.CONDITION_OPERATORS_LEN2 + Constants.ARITHMETIC_OPERATORS_LEN2:
+                if lastsplit != i:
+                    valueList.append(self.do_value(value[lastsplit:i]))
                 valueList.append((value[i:i + 2], "operator"))
                 lastsplit = i + 2
+                next(iterator)
+            elif value[i] in Constants.CONDITION_OPERATORS_LEN1 + Constants.ARITHMETIC_OPERATORS_LEN1 + ["(", ")"]:
+                if lastsplit != i:
+                    valueList.append(self.do_value(value[lastsplit:i]))
+                valueList.append((value[i], "operator"))
+                lastsplit = i + 1
+
 
         if len(valueList) > 0:
-            valueList.append(self.do_value(value[lastsplit:]))
-            res = valueList[0]
-            dt = None
-            for i in range(1, len(valueList) - 1, 2):
-                print("res: ", res, "value: ", valueList[i + 1], "operator: ", valueList[i])
-                res, dt = self.do_calculation(res, valueList[i+1], valueList[i])
-            return res, dt
+            if value[lastsplit:] != "":
+                if value[lastsplit:] == ")":
+                    valueList.append(("(", "operator"))
+                elif lastsplit != len(value):
+                    valueList.append(self.do_value(value[lastsplit:]))
+            print("valuelist: ", valueList)
+            if "(" in [x[0] for x in valueList]:
+                newValueList = []
+                lastsplit = 0
+                iterator = iter(range(len(valueList)))
+                for i in iterator:
+                    if valueList[i][0] == "(":
+                        closing_bracket = self.find_closing_bracket_in_value([x[0] for x in valueList], "(", i)
+                        for i in range(lastsplit, i):
+                            newValueList.append(valueList[i])
+                        print("do value:", "".join([x[0] for x in valueList[i+1:closing_bracket]]))
+                        value, dt = self.do_value("".join([x[0] for x in valueList[i+1:closing_bracket]]))
+                        newValueList.append((f"({value})", dt))
+                        lastsplit = closing_bracket + 1
+                        for _ in range(i, closing_bracket):
+                            next(iterator)
+                for i in range(lastsplit, len(valueList)):
+                    newValueList.append(valueList[i])
+                valueList = newValueList
+            for o in Constants.OPERATION_ORDER:
+                while True:
+                    for i in range(len(valueList)):
+                        if valueList[i][1] == "operator" and valueList[i][0] in o:
+                            res = self.do_operation(valueList[i - 1], valueList[i + 1], valueList[i])
+                            valueList[i - 1] = res
+                            del valueList[i + 1]
+                            del valueList[i]
+                            break
+                    else:
+                        break
+
+            return valueList[0][0], valueList[0][1]
 
         if value[0] in Constants.NUMBERS:
             for i in range(len(value)):
@@ -588,7 +617,6 @@ class Utils:
             return "", -1
 
     def add_variable_to_scope(self, name, datatype, line_index):
-        print("add to scope", name, datatype)
         for start, end in self.Variables.scope.keys():
             if start <= line_index <= end and self.Variables.indentations[line_index] == \
                     self.Variables.indentations[start]:

@@ -64,12 +64,11 @@ class Compiler(Utils):
         if self.Variables.totalLineCount == 0:
             return
         self.compiling = True
+        self.intialize()
         _ , line = next(self.Variables.iterator)
 
         if self.mode == "pc":
             if line.replace(" ", "") != "#main":
-                print(line)
-                print(line.replace(" ", "") + "l")
                 self.errors.append(Error("Missing #main at the beginning of the file", 0, 0, end_column=len(line)))
         else:
             if line.replace(" ", "") != "#board":
@@ -106,7 +105,7 @@ class Compiler(Utils):
                 self.Variables.code_done.append("void loop() {}")
             return "\n".join([open("../SerialCommunication/ArduinoSkripts/ArduinoSerial/ArduinoSerial.ino",
                                    "r").read()] + self.Variables.code_done)
-        included = ["#include <iostream>"]
+        included = ["#include <iostream>", "#include <cmath>"]
         namespaces = ["using namespace std;"]
         if connection_needed:
             included.append('#include "SerialCommunication/SerialPc.cpp"')
@@ -130,6 +129,7 @@ class Compiler(Utils):
     def get_completion(self, line, col):
         while self.compiling:
             pass
+        
 
 
     @staticmethod
