@@ -72,8 +72,12 @@ class Tests(unittest.TestCase):
                 (["#main", "int i = 2", "int j = 4", "print(i>j)"], "0"),
                 (["#main", "int i = 2", "int j = 4", "print(i>=j)"], "0"),
                 (["#main", "int i = 2", "int j = 4", "print(i<j and i>j)"], "0"),
-                (["#main", "int i = 2", "int j = 4", "print(i<j or i>j)"], "1"),
-                ]
+                (["#main", "int i = 2", "int j = 4", "print(i<j or i>j)"], "1"), # TODO implement not operator
+                # If
+                (["#main", "int i = 2", "if i == 2:", "    print(1)"], "1"),
+                (["#main", "int i = 2", "if i == 1:", "    print(1)", "else:", "    print(2)"], "2"),
+
+                    ]
         multiprocess_output(code)
 
     def test_sort(self):

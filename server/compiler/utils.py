@@ -253,6 +253,71 @@ class Utils:
             if_code.append(self.do_line(l))
         self.Variables.inIndentation -= 1
         if_code.append("}")
+        self.Variables.code_done.extend(if_code)
+        if_code.clear()
+        # check for elif
+        while True:
+            if self.Variables.currentLineIndex < self.Variables.totalLineCount - 1:
+                if self.Variables.code[self.Variables.currentLineIndex + 1].strip().startswith("elif"):
+                    if self.Variables.indentations[self.Variables.currentLineIndex + 1] != self.Variables.inIndentation:
+                        self.errors.append(Error("Expected indentation", self.Variables.currentLineIndex + 1,
+                                                 self.Variables.inIndentation * 4 + 1))
+                        break
+                    row = self.Variables.currentLineIndex + 1
+                    if self.Variables.indentations[row] + 1 != self.Variables.indentations[row + 1]:
+                        self.errors.append(Error("Expected indentation", row + 1, self.Variables.indentations[row + 1] * 4 + 1))
+                        return ""
+                    for i in range(row + 1, self.Variables.totalLineCount):
+                        if self.Variables.indentations[i] < self.Variables.indentations[row + 1]:
+                            end_indentation_index = i - 1
+                            break
+                    else:
+                        end_indentation_index = self.Variables.totalLineCount - 1
+
+                    self.Variables.currentLineIndex, self.Variables.currentLine = next(self.Variables.iterator)
+                    condition = self.do_value(
+                        self.Variables.currentLine[self.Variables.currentLine.find("elif") + 4:].strip())[0]
+                    self.Variables.code_done.append(f"else if ({condition}) {{")
+                    self.Variables.inIndentation += 1
+                    while self.Variables.currentLineIndex < end_indentation_index:
+                        self.Variables.currentLineIndex, l = next(self.Variables.iterator)
+                        if_code.append(self.do_line(l))
+                    self.Variables.inIndentation -= 1
+                    if_code.append("}")
+                    self.Variables.code_done.extend(if_code)
+                    if_code.clear()
+                else:
+                    break
+            else:
+                break
+
+        # check for else
+        if self.Variables.currentLineIndex < self.Variables.totalLineCount - 1:
+            if self.Variables.code[self.Variables.currentLineIndex + 1].strip().startswith("else"):
+                if self.Variables.indentations[self.Variables.currentLineIndex + 1] != self.Variables.inIndentation - 1:
+                    self.errors.append(Error("Expected indentation", self.Variables.currentLineIndex + 1,
+                                             self.Variables.inIndentation * 4 + 1))
+                row = self.Variables.currentLineIndex + 1
+                if self.Variables.indentations[row] + 1 != self.Variables.indentations[row + 1]:
+                    self.errors.append(Error("Expected indentation", row + 1, self.Variables.indentations[row + 1] * 4 + 1))
+                    return ""
+                for i in range(row + 1, self.Variables.totalLineCount):
+                    if self.Variables.indentations[i] < self.Variables.indentations[row + 1]:
+                        end_indentation_index = i - 1
+                        break
+                else:
+                    end_indentation_index = self.Variables.totalLineCount - 1
+
+                self.Variables.currentLineIndex, self.Variables.currentLine = next(self.Variables.iterator)
+                self.Variables.currentLineIndex += 1
+                self.Variables.currentLine = self.Variables.code[self.Variables.currentLineIndex]
+                self.Variables.code_done.append("else {")
+                self.Variables.inIndentation += 1
+                while self.Variables.currentLineIndex < end_indentation_index:
+                    self.Variables.currentLineIndex, l = next(self.Variables.iterator)
+                    if_code.append(self.do_line(l))
+                self.Variables.inIndentation -= 1
+                if_code.append("}")
         return "\n".join(if_code)
 
     def do_while(self, line):
