@@ -32,6 +32,7 @@ class Compiler(Utils):
         :param code: the code as list of lines
         """
         self.Variables.totalLineCount = len(self.code)
+        self.Variables.indentations = []
         for line in self.code:
             self.Variables.indentations.append(self.get_line_indentation(line))
         self.Variables.indentations.append(0)  # copium to prevent index out of range
@@ -58,6 +59,7 @@ class Compiler(Utils):
             current_id_level = i
         self.Variables.code = [x.replace("\n","") for x in self.Variables.code]
         self.Variables.iterator = enumerate(self.Variables.code)
+        self.Variables.code_done = []
 
     def compile(self):
         self.errors.clear()

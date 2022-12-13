@@ -76,6 +76,7 @@ class Tests(unittest.TestCase):
                 # If
                 (["#main", "int i = 2", "if i == 2:", "    print(1)"], "1"),
                 (["#main", "int i = 2", "if i == 1:", "    print(1)", "else:", "    print(2)"], "2"),
+                (["#main", "int i = 2", "if i == 1:", "    print(1)", "elif i == 2:", "    print(2)"],"2"),
 
                     ]
         multiprocess_output(code)
