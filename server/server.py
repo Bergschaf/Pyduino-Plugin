@@ -82,13 +82,16 @@ def _validate(ls, params):
 
 def _validate_pyduino(source):
     """Validates json file."""
+    errors = []
     compiler_pc, compiler_board = get_compiler(source)
-    compiler_pc.compile()
-    # compiler_board.compile()
-    print([str(error) for error in compiler_pc.errors])
-    return [error.get_Diagnostic() for error in
-            compiler_pc.errors]  # + [error.get_Diagnostic() for error in compiler_board.errors]
+    if compiler_pc is not None:
+        compiler_pc.compile()
+        errors += [error.get_Diagnostic() for error in compiler_pc.errors]
+    if compiler_board is not None:
+        compiler_board.compile()
+        errors += [error.get_Diagnostic() for error in compiler_board.errors]
 
+    return errors
 
 @json_server.feature(COMPLETION)  # comment  , CompletionOptions(trigger_characters=[',']))
 def completions(ls, params: Optional[CompletionParams] = None) -> CompletionList:

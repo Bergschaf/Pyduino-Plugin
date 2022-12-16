@@ -114,7 +114,8 @@ class Tests(unittest.TestCase):
                     "            int temp = array[j]",
                     "            array[j] = array[j + 1]",
                     "            array[j + 1] = temp",
-                    "print(array)"], "[1, 2, 3, 4, 5, 6]")]
+                    "print(array)"], "[1, 2, 3, 4, 5, 6]")
+               ]
         multiprocess_output(code)
 
 
