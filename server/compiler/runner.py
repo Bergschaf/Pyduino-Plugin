@@ -57,13 +57,17 @@ class Runner:
         subprocess.run(
             ["server/compiler/arduino-cli", "compile", "-b", "arduino:avr:uno", "--fqbn", "arduino:avr:uno", "temp"])
 
+    @staticmethod
+    def get_port():
+        # TODO selet option
+        return ["".join([x for i,x in enumerate(p) if not any([y == " " for y in p[:i+1]])]) for p in subprocess.run(["server/compiler/arduino-cli", "board", "list"], capture_output=True).stdout.decode("utf-8").split("\n")[1:] if "arduino" in p]
 
     def get_output_pc(self):
         self.compile_pc()
         return subprocess.getoutput(f"temp_{self.runner_id}.exe")
 
     def run_board(self):
-        subprocess.run(["server/compiler/arduino-cli", "upload", "-b","arduino:avr:uno", "-p", "COM5","temp"])
+        subprocess.run(["server/compiler/arduino-cli", "upload", "-b","arduino:avr:uno", "-p", self.get_port(),"temp"])
 
     def stop(self):
         subprocess.run(["taskkill", "/f", "/im", f"temp_{self.runner_id}.exe"])
@@ -77,12 +81,4 @@ class Runner:
             print("Error deleting files")
 
 
-if __name__ == '__main__':
-    from compiler import Compiler
 
-    c = Compiler(["#main", "int i = (2+2)+2"], "pc")
-    # r = Runner(c, None)
-    # r.run()
-    # r.stop()
-    c.compile()
-    print(c.finish(False))
