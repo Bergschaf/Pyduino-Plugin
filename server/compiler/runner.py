@@ -1,8 +1,9 @@
 import subprocess
 import os
 
+
 class Runner:
-    def __init__(self, compiler_pc, compiler_board, runner_id = 0):
+    def __init__(self, compiler_pc, compiler_board, runner_id=0):
         self.compiler_pc = compiler_pc
         self.compiler_board = compiler_board
         self.connection_needed = False
@@ -11,6 +12,8 @@ class Runner:
     def compile(self):
         if self.compiler_pc is not None and self.compiler_board is not None:
             self.compiler_board.compile()
+            self.connection_needed = self.compiler_board.Variables.connection_needed
+            print("Connectino needed (board): ", self.connection_needed)
             self.compile_pc()
             self.compile_board()
         elif self.compiler_pc is not None:
@@ -18,13 +21,13 @@ class Runner:
         elif self.compiler_board is not None:
             self.compile_board()
 
-    def run(self, compiled = False):
+    def run(self, compiled=False):
         if not compiled:
             self.compile()
-        if self.compiler_pc is not None:
-            self.run_pc()
         if self.compiler_board is not None:
             self.run_board()
+        if self.compiler_pc is not None:
+            self.run_pc()
 
     def compile_pc(self):
         self.compiler_pc.compile()
@@ -47,16 +50,20 @@ class Runner:
             raise Exception("Compiler error")
         self.connection_needed = True if self.compiler_board.Variables.connection_needed else self.connection_needed
         code = self.compiler_board.finish(self.connection_needed)
-        with open("temp.ino", "w") as f:
+        if not os.path.exists("temp"):
+            os.mkdir("temp")
+        with open("temp/temp.ino", "w") as f:
             f.write(code)
-        subprocess.run(["arduino-cli", "compile", "-b", "arduino:avr:uno", "--fqbn", "arduino:avr:uno", "temp.ino"])
+        subprocess.run(
+            ["server/compiler/arduino-cli", "compile", "-b", "arduino:avr:uno", "--fqbn", "arduino:avr:uno", "temp"])
+
 
     def get_output_pc(self):
         self.compile_pc()
         return subprocess.getoutput(f"temp_{self.runner_id}.exe")
 
     def run_board(self):
-        subprocess.run(["arduino-cli", "upload", "-b", "arduino:avr:uno", "--fqbn", "arduino:avr:uno", "temp.ino"])
+        subprocess.run(["server/compiler/arduino-cli", "upload", "-b","arduino:avr:uno", "-p", "COM5","temp"])
 
     def stop(self):
         subprocess.run(["taskkill", "/f", "/im", f"temp_{self.runner_id}.exe"])
@@ -69,12 +76,13 @@ class Runner:
         except Exception:
             print("Error deleting files")
 
+
 if __name__ == '__main__':
     from compiler import Compiler
-    c = Compiler(["#main","int i = (2+2)+2"], "pc")
-    #r = Runner(c, None)
-    #r.run()
-    #r.stop()
+
+    c = Compiler(["#main", "int i = (2+2)+2"], "pc")
+    # r = Runner(c, None)
+    # r.run()
+    # r.stop()
     c.compile()
     print(c.finish(False))
-

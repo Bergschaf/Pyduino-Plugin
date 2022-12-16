@@ -56,7 +56,8 @@ class Utils:
             col += 1
 
         self.errors.append(Error(f"No closing bracket found for '{bracket}'",
-                                 self.Variables.currentLineIndex, self.Variables.currentLine.find(value), line_offset=self.line_offset))
+                                 self.Variables.currentLineIndex, self.Variables.currentLine.find(value),
+                                 line_offset=self.line_offset))
 
     def do_arguments(self, argstring, after_col=0):
         """
@@ -80,11 +81,12 @@ class Utils:
         all_args.append(argstring[last_split:])
         for arg in all_args:
             arg = arg.strip()
-            if " = " not in arg: # TODO accept kwargs if = is without spaces
+            if " = " not in arg:  # TODO accept kwargs if = is without spaces
                 if kwargs:
                     self.errors.append(Error(f"Non-keyword argument '{arg}' after keyword argument",
                                              self.Variables.currentLineIndex,
-                                             self.Variables.currentLine.find(arg, after_col),line_offset=self.line_offset))
+                                             self.Variables.currentLine.find(arg, after_col),
+                                             line_offset=self.line_offset))
 
                 args.append(self.do_value(arg))
             else:
@@ -101,10 +103,12 @@ class Utils:
             return ""
 
         if self.get_line_indentation(line) != self.Variables.inIndentation:
-            self.errors.append(Error(f"Indentation error", self.Variables.currentLineIndex, 0,line_offset=self.line_offset))
+            self.errors.append(
+                Error(f"Indentation error", self.Variables.currentLineIndex, 0, line_offset=self.line_offset))
 
         if (len(line) - len(line.lstrip())) % Constants.DEFAULT_INDEX_LEVEL != 0:
-            self.errors.append(Error(f"Indentation error", self.Variables.currentLineIndex, 0,line_offset=self.line_offset))
+            self.errors.append(
+                Error(f"Indentation error", self.Variables.currentLineIndex, 0, line_offset=self.line_offset))
         if instruction == "":
             return ""
         self.Variables.currentColumnIndex = line.find(instruction)
@@ -131,7 +135,8 @@ class Utils:
             return self.do_break_continue(instruction)
         else:
             self.errors.append(Error(f"Unknown instruction '{instruction}'",
-                                     self.Variables.currentLineIndex, 0, end_column=len(self.Variables.currentLine),line_offset=self.line_offset))
+                                     self.Variables.currentLineIndex, 0, end_column=len(self.Variables.currentLine),
+                                     line_offset=self.line_offset))
             return ""
 
     def check_function_definition(self, line):
@@ -170,7 +175,8 @@ class Utils:
         """
         if "=" not in line:
             self.errors.append(Error("No value assigned to variable",
-                                     self.Variables.currentLineIndex, self.Variables.currentLine.find(line),line_offset=self.line_offset))
+                                     self.Variables.currentLineIndex, self.Variables.currentLine.find(line),
+                                     line_offset=self.line_offset))
             return ""
         line = line.strip()
         datatype = line.split("=")[0].strip().split(" ")[0].strip()
@@ -181,11 +187,12 @@ class Utils:
             if dt != -1:
                 if dt != datatype:
                     self.errors.append(Error(f"Datatype mismatch: {datatype} != {dt}", self.Variables.currentLineIndex,
-                                             self.Variables.currentLine.find(line),line_offset=self.line_offset))
+                                             self.Variables.currentLine.find(line), line_offset=self.line_offset))
                     return ""
             if self.variable_in_scope(name, self.Variables.currentLineIndex)[1]:
                 self.errors.append(Error(f"Variable '{name}' already defined in this scope",
-                                         self.Variables.currentLineIndex, self.Variables.currentLine.find(name),line_offset=self.line_offset))
+                                         self.Variables.currentLineIndex, self.Variables.currentLine.find(name),
+                                         line_offset=self.line_offset))
                 return ""
             self.add_variable_to_scope(name, datatype, self.Variables.currentLineIndex)
             return f"{datatype} {name} = {value};"
@@ -196,16 +203,17 @@ class Utils:
             if dt != -1:
                 if dt != datatype[:-2]:
                     self.errors.append(Error(f"Datatype mismatch: {datatype} != {dt}", self.Variables.currentLineIndex,
-                                             self.Variables.currentLine.find(line),line_offset=self.line_offset))
+                                             self.Variables.currentLine.find(line), line_offset=self.line_offset))
             if self.variable_in_scope(name, self.Variables.currentLineIndex)[1]:
                 self.errors.append(Error(f"Variable '{name}' already defined in this scope",
-                                         self.Variables.currentLineIndex, self.Variables.currentLine.find(name),line_offset=self.line_offset))
+                                         self.Variables.currentLineIndex, self.Variables.currentLine.find(name),
+                                         line_offset=self.line_offset))
                 return ""
             self.add_variable_to_scope(name, datatype, self.Variables.currentLineIndex)
             return f"{datatype[:-2]} {name}[] = {value};"
         else:
             self.errors.append(Error(f"Datatype '{datatype}' not supported", self.Variables.currentLineIndex,
-                                     self.Variables.currentLine.find(datatype),line_offset=self.line_offset))
+                                     self.Variables.currentLine.find(datatype), line_offset=self.line_offset))
             return ""
 
     def do_variable_assignment(self, line):
@@ -221,27 +229,30 @@ class Utils:
             return ""
         if not self.variable_in_scope(name, self.Variables.currentLineIndex)[0]:
             self.errors.append(Error(f"Variable '{name}' not defined in this scope", self.Variables.currentLineIndex,
-                                     self.Variables.currentLine.find(name),line_offset=self.line_offset))
+                                     self.Variables.currentLine.find(name), line_offset=self.line_offset))
             return ""
         if dt != self.variable_in_scope(name, self.Variables.currentLineIndex)[1] and dt is not None:
             self.errors.append(
                 Error(f"Datatype mismatch: {self.variable_in_scope(name, self.Variables.currentLineIndex)[1]} != {dt}",
-                      self.Variables.currentLineIndex, self.Variables.currentLine.find(line),line_offset=self.line_offset))
+                      self.Variables.currentLineIndex, self.Variables.currentLine.find(line),
+                      line_offset=self.line_offset))
             return ""
         return f"{name} = {value};"
 
     def do_if(self, line):
         col_index = line.find("if") + 2
-    
+
         if line.strip()[-1] != ":":
             self.errors.append(
-                Error("Expected ':' after if", self.Variables.currentLineIndex, len(self.Variables.currentLine) - 1,line_offset=self.line_offset))
+                Error("Expected ':' after if", self.Variables.currentLineIndex, len(self.Variables.currentLine) - 1,
+                      line_offset=self.line_offset))
 
         row = self.Variables.currentLineIndex
         col = len(line) - 1
         condition = self.do_value(line[col_index + 1:col])[0]
         if self.Variables.indentations[row] + 1 != self.Variables.indentations[row + 1]:
-            self.errors.append(Error("Expected indentation", row + 1, self.Variables.indentations[row + 1] * 4 + 1,line_offset=self.line_offset))
+            self.errors.append(Error("Expected indentation", row + 1, self.Variables.indentations[row + 1] * 4 + 1,
+                                     line_offset=self.line_offset))
             return ""
         for i in range(row + 1, self.Variables.totalLineCount):
             if self.Variables.indentations[i] < self.Variables.indentations[row + 1]:
@@ -265,7 +276,9 @@ class Utils:
                 if self.Variables.code[self.Variables.currentLineIndex + 1].strip().startswith("elif"):
                     row = self.Variables.currentLineIndex + 1
                     if self.Variables.indentations[row] + 1 != self.Variables.indentations[row + 1]:
-                        self.errors.append(Error("Expected indentation", row + 1, self.Variables.indentations[row + 1] * 4 + 1,line_offset=self.line_offset))
+                        self.errors.append(
+                            Error("Expected indentation", row + 1, self.Variables.indentations[row + 1] * 4 + 1,
+                                  line_offset=self.line_offset))
                         return ""
                     for i in range(row + 1, self.Variables.totalLineCount):
                         if self.Variables.indentations[i] < self.Variables.indentations[row + 1]:
@@ -296,7 +309,9 @@ class Utils:
             if self.Variables.code[self.Variables.currentLineIndex + 1].strip().startswith("else"):
                 row = self.Variables.currentLineIndex + 1
                 if self.Variables.indentations[row] + 1 != self.Variables.indentations[row + 1]:
-                    self.errors.append(Error("Expected indentation", row + 1, self.Variables.indentations[row + 1] * 4 + 1,line_offset=self.line_offset))
+                    self.errors.append(
+                        Error("Expected indentation", row + 1, self.Variables.indentations[row + 1] * 4 + 1,
+                              line_offset=self.line_offset))
                     return ""
                 for i in range(row + 1, self.Variables.totalLineCount):
                     if self.Variables.indentations[i] < self.Variables.indentations[row + 1]:
@@ -320,13 +335,15 @@ class Utils:
         col_index = line.find("while") + 5
         if line.strip()[-1] != ":":
             self.errors.append(
-                Error("Expected ':' after while", self.Variables.currentLineIndex, len(self.Variables.currentLine) - 1,line_offset=self.line_offset))
+                Error("Expected ':' after while", self.Variables.currentLineIndex, len(self.Variables.currentLine) - 1,
+                      line_offset=self.line_offset))
 
         row = self.Variables.currentLineIndex
         col = len(line) - 1
         condition = self.do_value(line[col_index + 1:col])[0]
         if self.Variables.indentations[row] + 1 != self.Variables.indentations[row + 1]:
-            self.errors.append(Error("Expected indentation", row + 1, self.Variables.indentations[row + 1] * 4 + 1,line_offset=self.line_offset))
+            self.errors.append(Error("Expected indentation", row + 1, self.Variables.indentations[row + 1] * 4 + 1,
+                                     line_offset=self.line_offset))
             return ""
         for i in range(row + 1, self.Variables.totalLineCount):
             if self.Variables.indentations[i] < self.Variables.indentations[row + 1]:
@@ -350,7 +367,8 @@ class Utils:
         col_index = line.find("for") + 3
         if line.strip()[-1] != ":":
             self.errors.append(
-                Error("Expected ':' after for", self.Variables.currentLineIndex, len(self.Variables.currentLine) - 1,line_offset=self.line_offset))
+                Error("Expected ':' after for", self.Variables.currentLineIndex, len(self.Variables.currentLine) - 1,
+                      line_offset=self.line_offset))
 
         row = self.Variables.currentLineIndex
         elements = [x.strip() for x in line[col_index + 1:-1].split("in")]
@@ -358,12 +376,13 @@ class Utils:
         if len(elements) != 2:
             self.errors.append(Error("Expected 'in' in for loop", self.Variables.currentLineIndex,
                                      self.Variables.currentLine.find("for"),
-                                     end_column=len(self.Variables.currentLine),line_offset=self.line_offset))
+                                     end_column=len(self.Variables.currentLine), line_offset=self.line_offset))
             return ""
 
         counter_variable = elements[0]
         if self.Variables.indentations[row] + 1 != self.Variables.indentations[row + 1]:
-            self.errors.append(Error("Expected indentation", row + 1, self.Variables.indentations[row + 1] * 4 + 1,line_offset=self.line_offset))
+            self.errors.append(Error("Expected indentation", row + 1, self.Variables.indentations[row + 1] * 4 + 1,
+                                     line_offset=self.line_offset))
             return ""
         for i in range(row + 1, self.Variables.totalLineCount):
             if self.Variables.indentations[i] < self.Variables.indentations[row + 1]:
@@ -375,7 +394,8 @@ class Utils:
         if elements[1][:5] == "range":
             if elements[1][5] != "(":
                 self.errors.append(Error("Expected '(' after range", self.Variables.currentLineIndex,
-                                         self.Variables.currentLineIndex, len(self.Variables.currentLine) - 1,line_offset=self.line_offset))
+                                         self.Variables.currentLineIndex, len(self.Variables.currentLine) - 1,
+                                         line_offset=self.line_offset))
                 elements[1] += ")"
             range_arguments, range_kwargs = self.do_arguments(elements[1][6:-1])
             if any([x[1] != "int" and x[1] != "short" and x[1] != "long" and x[1] is not None for x in
@@ -383,12 +403,12 @@ class Utils:
                 self.errors.append(
                     Error("Expected int, short or long as argument in 'range'", self.Variables.currentLineIndex
                           , self.Variables.currentLine.find("range") + 5,
-                          end_column=len(self.Variables.currentLine) - 2,line_offset=self.line_offset))
+                          end_column=len(self.Variables.currentLine) - 2, line_offset=self.line_offset))
                 return ""
             if len(range_kwargs) != 0:
                 self.errors.append(Error("Expected no keyword arguments in 'range'", self.Variables.currentLineIndex,
                                          self.Variables.currentLine.find("range") + 5,
-                                         end_column=len(self.Variables.currentLine) - 2,line_offset=self.line_offset))
+                                         end_column=len(self.Variables.currentLine) - 2, line_offset=self.line_offset))
                 return ""
 
             if len(range_arguments) == 1:
@@ -403,7 +423,7 @@ class Utils:
             else:
                 self.errors.append(Error("Expected 1 or 2 arguments in 'range'", self.Variables.currentLineIndex,
                                          self.Variables.currentLine.find("range") + 5,
-                                         end_column=len(self.Variables.currentLine) - 2,line_offset=self.line_offset))
+                                         end_column=len(self.Variables.currentLine) - 2, line_offset=self.line_offset))
                 for_code = []
         else:
             val, dt = self.do_value(elements[1])
@@ -415,7 +435,7 @@ class Utils:
             else:
                 self.errors.append(Error("Expected 'range' or iterable after for", self.Variables.currentLineIndex,
                                          self.Variables.currentLine.find("for"),
-                                         end_column=len(self.Variables.currentLine),line_offset=self.line_offset))
+                                         end_column=len(self.Variables.currentLine), line_offset=self.line_offset))
                 for_code = []
         if dt != -1:
             self.add_variable_to_scope(counter_variable, dt[:-2], self.Variables.currentLineIndex)
@@ -433,21 +453,23 @@ class Utils:
         if 0 == self.Variables.inLoop:
             self.errors.append(Error(f"Can only {line} in a loop", self.Variables.currentLineIndex,
                                      self.Variables.indentations[self.Variables.currentLineIndex] * 4,
-                                     end_column=len(self.Variables.currentLine),line_offset=self.line_offset))
+                                     end_column=len(self.Variables.currentLine), line_offset=self.line_offset))
             return ""
         return line + ";"
 
     def do_operation(self, left, right, operator, after_col=0):
         if operator[1] != "operator":
             self.errors.append(Error(f"Expected operator, got {operator[0]}", self.Variables.currentLineIndex,
-                                     self.Variables.currentLine.find(operator[0], after_col),line_offset=self.line_offset))
+                                     self.Variables.currentLine.find(operator[0], after_col),
+                                     line_offset=self.line_offset))
 
         if operator[0] in Constants.COMPAIRSON:
             if left[1] in Constants.NUMERIC_TYPES and right[1] in Constants.NUMERIC_TYPES:
                 return f"({left[0]} {operator[0]} {right[0]})", "bool"
             else:
-                self.errors.append(Error(f"Expected numeric types, got {left[1]} and {right[1]}", self.Variables.currentLineIndex,
-                                         self.Variables.currentLine.find(operator[0], after_col),line_offset=self.line_offset))
+                self.errors.append(
+                    Error(f"Expected numeric types, got {left[1]} and {right[1]}", self.Variables.currentLineIndex,
+                          self.Variables.currentLine.find(operator[0], after_col), line_offset=self.line_offset))
         operator = operator[0]
 
         if left[1] == "int" and right[1] == "int" and operator in Constants.ARITHMETIC_OPERATORS:
@@ -455,7 +477,7 @@ class Utils:
                 self.errors.append(Error("Division by zero", self.Variables.currentLineIndex,
                                          self.Variables.currentLine.find(left[0], after_col) + len(left[0]),
                                          end_column=self.Variables.currentLine.find(right[0], after_col) + len(
-                                             right[0]),line_offset=self.line_offset))
+                                             right[0]), line_offset=self.line_offset))
                 return "", "float"
             if operator == "/":
                 return f"((float){left[0]} / (float){right[0]})", "float"
@@ -470,7 +492,7 @@ class Utils:
                                          self.Variables.currentLineIndex,
                                          self.Variables.currentLine.find(right[0], after_col),
                                          end_column=self.Variables.currentLine.find(right[0], after_col) + len(
-                                             right[0]),line_offset=self.line_offset))
+                                             right[0]), line_offset=self.line_offset))
                 return "", "int"
             if operator == "//":
                 return f"floor({left[0]} / {right[0]})", "int"
@@ -485,11 +507,12 @@ class Utils:
                 self.errors.append(Error("Can't use operator on booleans", self.Variables.currentLineIndex,
                                          self.Variables.currentLine.find(left[0], after_col) + len(left[0]),
                                          end_column=self.Variables.currentLine.find(right[0], after_col) + len(
-                                             right[0]),line_offset=self.line_offset))
+                                             right[0]), line_offset=self.line_offset))
             return "", "bool"
         self.errors.append(Error("Can't use operator on these types", self.Variables.currentLineIndex,
                                  self.Variables.currentLine.find(left[0], after_col) + len(left[0]),
-                                 end_column=self.Variables.currentLine.find(right[0], after_col) + len(right[0]),line_offset=self.line_offset))
+                                 end_column=self.Variables.currentLine.find(right[0], after_col) + len(right[0]),
+                                 line_offset=self.line_offset))
         return "", None
 
     def do_value(self, value, after_col=0):
@@ -509,12 +532,12 @@ class Utils:
         if value.count("'") % 2 == 1:
             self.errors.append(Error("Expected \"'\" after character", self.Variables.currentLineIndex,
                                      self.Variables.currentLine.find(value, after_col),
-                                     end_column=len(self.Variables.currentLine),line_offset=self.line_offset))
+                                     end_column=len(self.Variables.currentLine), line_offset=self.line_offset))
             return "", -1
         if value.count('"') % 2 == 1:
             self.errors.append(Error("Expected '\"' after string", self.Variables.currentLineIndex,
                                      self.Variables.currentLine.find(value, after_col),
-                                     end_column=len(self.Variables.currentLine),line_offset=self.line_offset))
+                                     end_column=len(self.Variables.currentLine), line_offset=self.line_offset))
             return "", -1
 
         if value[0] == '"':
@@ -548,7 +571,8 @@ class Utils:
                 while i < lastsplit:
                     next(iterator)
 
-            elif i+2 < len(value) and value[i:i + 2] in Constants.CONDITION_OPERATORS_LEN2 + Constants.ARITHMETIC_OPERATORS_LEN2:
+            elif i + 2 < len(value) and value[
+                                        i:i + 2] in Constants.CONDITION_OPERATORS_LEN2 + Constants.ARITHMETIC_OPERATORS_LEN2:
                 if lastsplit != i:
                     valueList.append(self.do_value(value[lastsplit:i]))
                 valueList.append((value[i:i + 2], "operator"))
@@ -559,7 +583,6 @@ class Utils:
                     valueList.append(self.do_value(value[lastsplit:i]))
                 valueList.append((value[i], "operator"))
                 lastsplit = i + 1
-
 
         if len(valueList) > 0:
             if value[lastsplit:] != "":
@@ -577,12 +600,11 @@ class Utils:
                         closing_bracket = self.find_closing_bracket_in_value([x[0] for x in valueList], "(", i)
                         for i in range(lastsplit, i):
                             newValueList.append(valueList[i])
-                        value, dt = self.do_value("".join([x[0] for x in valueList[i+1:closing_bracket]]))
+                        value, dt = self.do_value("".join([x[0] for x in valueList[i + 1:closing_bracket]]))
                         newValueList.append((f"({value})", dt))
                         lastsplit = closing_bracket + 1
                         for _ in range(i, closing_bracket):
                             next(iterator)
-
 
             for o in Constants.OPERATION_ORDER:
                 while True:
@@ -609,7 +631,7 @@ class Utils:
                     return value, "int"
             self.errors.append(Error("Value is not a number", self.Variables.currentLineIndex,
                                      self.Variables.currentLine.find(value),
-                                     end_column=len(self.Variables.currentLine),line_offset=self.line_offset))
+                                     end_column=len(self.Variables.currentLine), line_offset=self.line_offset))
             return "", -1
 
         if value[0] == "-" or value[0] == "+" and value[1] in Constants.NUMBERS:
@@ -623,7 +645,7 @@ class Utils:
                     return value, "int"
             self.errors.append(Error("Value is not a number", self.Variables.currentLineIndex,
                                      self.Variables.currentLine.find(value, after_col),
-                                     end_column=len(self.Variables.currentLine),line_offset=self.line_offset))
+                                     end_column=len(self.Variables.currentLine), line_offset=self.line_offset))
             return "", -1
 
         elif "[" in value and value[-1] == "]":
@@ -632,7 +654,8 @@ class Utils:
             if not dt:
                 self.errors.append(Error(f"Variable is not defined in this scope", self.Variables.currentLineIndex,
                                          self.Variables.currentLine.find(value, after_col),
-                                         self.Variables.currentLine.find(value, after_col) + len(value),line_offset=self.line_offset))
+                                         self.Variables.currentLine.find(value, after_col) + len(value),
+                                         line_offset=self.line_offset))
                 return "", -1
 
             if dt not in Constants.ITERABLES:
@@ -647,13 +670,15 @@ class Utils:
                 if dtid != "int":
                     self.errors.append(Error(f"Array Index must be int, not '{dtid}'", self.Variables.currentLineIndex,
                                              self.Variables.currentLine.find(value, after_col),
-                                             end_column=len(value) + self.Variables.currentLine.find(value),line_offset=self.line_offset))
+                                             end_column=len(value) + self.Variables.currentLine.find(value),
+                                             line_offset=self.line_offset))
                     return "", -1
                 return f"{arg}[{index}]", dt[:-2]
             else:
                 self.errors.append(Error("Iterable type not yet implemented", self.Variables.currentLineIndex,
                                          self.Variables.currentLine.find(value, after_col),
-                                         end_column=len(value) + self.Variables.currentLine.find(value),line_offset=self.line_offset))
+                                         end_column=len(value) + self.Variables.currentLine.find(value),
+                                         line_offset=self.line_offset))
 
         elif value == "True":
             return "true", "bool"
@@ -669,7 +694,7 @@ class Utils:
         else:
             self.errors.append(Error("Value is not defined", self.Variables.currentLineIndex,
                                      self.Variables.currentLine.find(value, after_col),
-                                     end_column=len(self.Variables.currentLine),line_offset=self.line_offset))
+                                     end_column=len(self.Variables.currentLine), line_offset=self.line_offset))
             return "", -1
 
     def add_variable_to_scope(self, name, datatype, line_index):
@@ -693,7 +718,8 @@ class Utils:
                 self.errors.append(Error(f"Can only get element out of iterable type, not out of '{dt}'",
                                          self.Variables.currentLineIndex,
                                          self.Variables.currentLine.find(name),
-                                         end_column=len(name) + self.Variables.currentLine.find(name),line_offset=self.line_offset))
+                                         end_column=len(name) + self.Variables.currentLine.find(name),
+                                         line_offset=self.line_offset))
                 return "", None
             if dt in Constants.PRIMITIVE_ARRAY_TYPES:
                 _, dti = self.do_value(index)
@@ -702,7 +728,7 @@ class Utils:
                                              self.Variables.currentLineIndex,
                                              self.Variables.currentLine.find(name) + len(name),
                                              end_column=len(name) + self.Variables.currentLine.find(name) + len(
-                                                 index),line_offset=self.line_offset))
+                                                 index), line_offset=self.line_offset))
                     return "", None
                 return f"{name}[{index}]", dt[:-2]
 
@@ -725,19 +751,22 @@ class Utils:
             self.errors.append(Error("Array initializer must start with '[' and end with ']'",
                                      self.Variables.currentLineIndex,
                                      self.Variables.currentLine.find(value),
-                                     end_column=len(value) + self.Variables.currentLine.find(value),line_offset=self.line_offset))
+                                     end_column=len(value) + self.Variables.currentLine.find(value),
+                                     line_offset=self.line_offset))
             return "", -1
         args, kwargs = self.do_arguments(value[1:-1])
         if len(kwargs) != 0:
             self.errors.append(
                 Error(f"Array initializer can not have keyword arguments (= sign)",
-                      self.Variables.currentLineIndex, self.Variables.currentLine.find(value),line_offset=self.line_offset))
+                      self.Variables.currentLineIndex, self.Variables.currentLine.find(value),
+                      line_offset=self.line_offset))
             return -1
         dt = args[0][1]
         if any([x[1] != dt for x in args]):
             self.errors.append(
                 Error(f"Array initializer can not have different datatypes at line {self.Variables.currentLineIndex}",
-                      self.Variables.currentLineIndex, self.Variables.currentLine.find(value),line_offset=self.line_offset))
+                      self.Variables.currentLineIndex, self.Variables.currentLine.find(value),
+                      line_offset=self.line_offset))
             return "", -1
 
         return f"{{{', '.join([x[0] for x in args])}}}", dt

@@ -2,7 +2,7 @@
 // Created by Christian on 26.09.2022.
 //
 #include <iostream>
-#include "SerialClass.h"
+#include "Serial.cpp"
 
 
 using namespace std;
@@ -254,7 +254,7 @@ public:
     Serial *SP;
     thread *listenerThread{};
     explicit Arduino(){
-        this->SP = new Serial(R"(\\.\COM8)");
+        this->SP = new Serial(R"(\\.\COM5)");
         if (!SP->IsConnected()) {
                 cout << "Connection Error" << endl;
         }

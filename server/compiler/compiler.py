@@ -89,7 +89,7 @@ class Compiler(Utils):
         if self.mode == "arduino":
             self.Variables.code_done.insert(0, "void setup(){")
             if connection_needed:
-                self.Variables.code_done.insert(1, "innit_serial();")
+                self.Variables.code_done.insert(1, "innit_serial();\ndelay(200);")
 
                 # insert "checkSerial();" after every line
                 for i in range(1, len(self.Variables.code_done) - 1):
@@ -108,12 +108,12 @@ class Compiler(Utils):
                 self.Variables.code_done.insert(0, """void betterdelay(int ms) {
                 delay(ms);}""")
                 self.Variables.code_done.append("void loop() {}")
-            return "\n".join([open("../SerialCommunication/ArduinoSkripts/ArduinoSerial/ArduinoSerial.ino",
+            return "\n".join([open("server/compiler/SerialCommunication/ArduinoSerial.ino",
                                    "r").read()] + self.Variables.code_done)
         included = ["#include <iostream>", "#include <cmath>"]
         namespaces = ["using namespace std;"]
         if connection_needed:
-            included.append('#include "SerialCommunication/SerialPc.cpp"')
+            included.append('#include "server/compiler/SerialCommunication/SerialPc.cpp"')
 
         if "delay" in self.Variables.builtins_needed:
             included.append('#include <chrono>')
@@ -123,10 +123,12 @@ class Compiler(Utils):
 
         if connection_needed:
             self.Variables.code_done.insert(0, "int main(){ Arduino arduino = Arduino();")
+            self.Variables.code_done.insert(-1, "sleep_for(seconds(10000000000000));")
         else:
             self.Variables.code_done.insert(0, "int main(){")
 
         self.Variables.code_done = included + namespaces + self.Variables.code_done
+
         return "\n".join(self.Variables.code_done)
 
     def get_completion(self, line, col):

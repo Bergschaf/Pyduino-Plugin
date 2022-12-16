@@ -47,6 +47,7 @@ class Builtins:
             return f"sizeof({arg}) / sizeof({arg}[0])", "int", True
 
 
+
 class BuiltinsArduino(Builtins):
     def __init__(self, variables, errors):
         super().__init__(variables, errors)
@@ -114,7 +115,7 @@ class BuiltinsArduino(Builtins):
             return "", None, True
         return f"analogWrite({pin}, {value});", "void", True
 
-    def do_print(self, args, kwargs):
+    def do_print(self, args, kwargs, after_col=0):
         self.Variables.builtins_needed.append("print")
         self.Variables.connection_needed = True
         newline = "true"
@@ -137,9 +138,22 @@ class BuiltinsArduino(Builtins):
                                                                     , "(", self.Variables.currentLine.index("("))))
         var = self.next_sys_variable()
         # Check if it is possible to convert arguments to string
-        self.Variables.code_done.append(
-            f"String {var}[] = {{ {', '.join([f'String({arg[0]})' for arg in args])} }};")
-        return f"do_print({var}, {len(args)}, {newline})", None, False
+        res = f"String {var} = \"\";"
+        for i, arg in enumerate(args):
+            if arg[1] in Constants.ITERABLES:
+                var_1 = self.next_sys_variable()
+                res += f"{var} += \"[\";"
+                var_3 = self.next_sys_variable()
+                res += f"int {var_3} = 0;"
+                res += f"for (auto {var_1} : {arg[0]}) {{ {var_3}++; \n{var} += String({var_1}); \n" \
+                       f"if({var_3} < sizeof({arg[0]}) / sizeof({arg[0]}[0])){{ {var} += \", \";}} }}\n"
+                res += f"{var} += \"]\";"
+            else:
+                res += f"{var} += String({arg[0]});"
+        var_2 = self.next_sys_variable()
+        res += f"const String* {var_2} = &{var};"
+
+        return res + f"\ndo_print({var_2}, {len(args)}, {newline});", None, False
 
     def do_delay(self, args, kwargs):
         self.Variables.builtins_needed.append("delay")
@@ -151,7 +165,7 @@ class BuiltinsArduino(Builtins):
                                                                 self.Variables.currentLine
                                                                 , "(", self.Variables.currentLine.index("("))))
             return "", None, True
-        return f"betterdelay({args[0][0]})", "void", True
+        return f"betterdelay({args[0][0]});", "void", True
 
 
 class BuiltinsPC(Builtins):

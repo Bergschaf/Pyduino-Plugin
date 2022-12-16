@@ -72,7 +72,7 @@ char getNextRequestId() {
         if (Requests[i] == 0) {
             return (byte) i;
         }
-    }}
+    }
 }
 
 // TODO implement asynchronous waiting for data

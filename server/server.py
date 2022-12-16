@@ -111,6 +111,8 @@ def completions(ls, params: Optional[CompletionParams] = None) -> CompletionList
 
 @json_server.command(PyduinoLanguageServer.RUN_PYDUINO)
 def runPyduino(ls, *args):
+    if PyduinoLanguageServer.runner is not None:
+        PyduinoLanguageServer.runner.stop()
     compiler_pc, compiler_board = get_compiler(ls)
     PyduinoLanguageServer.runner = Runner(compiler_pc, compiler_board)
     try:
