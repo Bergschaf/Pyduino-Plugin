@@ -145,6 +145,10 @@ class Utils:
         function_name = value[:first_bracket]
 
         second_bracket = self.find_closing_bracket_in_value(value, "(", first_bracket)
+        if second_bracket is None:
+            return
+        if second_bracket != len(value) - 1:
+            return
         arguments = value[first_bracket + 1:second_bracket]
         # TODO was wenn , in arguemtns?
         args, kwargs = self.do_arguments(arguments)
@@ -496,6 +500,9 @@ class Utils:
         """
         value = value.strip()
 
+        if self.check_function_execution(value) is not None:
+            return self.check_function_execution(value)
+
         if len(value) == 0:
             return "", None
 
@@ -522,32 +529,26 @@ class Utils:
         value = value.replace(" not ", "!")
         value = value.replace(" ", "")
         valueList = []
-        last_function_end = 0
-        for i in range(len(value) - 1):
-            if value[i + 1] == "(" and value[i] in Constants.VALID_NAME_LETTERS:
-                for j in range(i, -1, -1):
-                    if j in Constants.ALL_SYNTAX_ELEMENTS:
-                        start_col = j + 1
+        lastsplit = 0
+        iterator = iter(range(len(value)))
+        for i in iterator:
+            if i + 1 < len(value) and value[i + 1] == "(" and value[i] in Constants.VALID_NAME_LETTERS:
+                if lastsplit != i:
+                    valueList.append(self.do_value(value[lastsplit:i]))
 
+                for j in range(i, -1, -1):
+                    if value[j] in Constants.ALL_SYNTAX_ELEMENTS:
+                        start_col = j + 1
                         break
                 else:
                     start_col = 0
                 end_col = self.find_closing_bracket_in_value(value, "(", i + 1)
-                valueList.append(self.do_value(value[last_function_end:start_col]))
                 valueList.append(self.check_function_execution(value[start_col:end_col + 1]))
-                last_function_end = end_col + 1
+                lastsplit = end_col + 1
+                while i < lastsplit:
+                    next(iterator)
 
-        if len(valueList) > 0:
-            valueList.append(self.do_value(value[last_function_end:]))
-            # TODO return datatype here
-            if not any([x is None or x[1] == -1 for x in valueList]):
-                return " ".join([x[0] for x in valueList]), valueList[0][1]
-            return "", -1
-
-        lastsplit = 0
-        iterator = iter(range(len(value)))
-        for i in iterator:
-            if i+2 < len(value) and value[i:i + 2] in Constants.CONDITION_OPERATORS_LEN2 + Constants.ARITHMETIC_OPERATORS_LEN2:
+            elif i+2 < len(value) and value[i:i + 2] in Constants.CONDITION_OPERATORS_LEN2 + Constants.ARITHMETIC_OPERATORS_LEN2:
                 if lastsplit != i:
                     valueList.append(self.do_value(value[lastsplit:i]))
                 valueList.append((value[i:i + 2], "operator"))
@@ -576,15 +577,13 @@ class Utils:
                         closing_bracket = self.find_closing_bracket_in_value([x[0] for x in valueList], "(", i)
                         for i in range(lastsplit, i):
                             newValueList.append(valueList[i])
-                        print("do value:", "".join([x[0] for x in valueList[i+1:closing_bracket]]))
                         value, dt = self.do_value("".join([x[0] for x in valueList[i+1:closing_bracket]]))
                         newValueList.append((f"({value})", dt))
                         lastsplit = closing_bracket + 1
                         for _ in range(i, closing_bracket):
                             next(iterator)
-                for i in range(lastsplit, len(valueList)):
-                    newValueList.append(valueList[i])
-                valueList = newValueList
+
+
             for o in Constants.OPERATION_ORDER:
                 while True:
                     for i in range(len(valueList)):
@@ -596,7 +595,7 @@ class Utils:
                             break
                     else:
                         break
-
+            print("valuelist: ", valueList, value)
             return valueList[0][0], valueList[0][1]
 
         if value[0] in Constants.NUMBERS:

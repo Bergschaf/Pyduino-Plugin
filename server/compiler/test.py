@@ -83,6 +83,11 @@ class Tests(unittest.TestCase):
                   "    print(3)", "print(4)"], "2\n4"),
                 (["#main", "int i = 2", "if i == 1:", "    print(1)", "elif i == 2:", "    print(2)", "else:",
                   "    print(3)", "print(4)", "if i == 2:", "    print(5)"], "2\n4\n5"),
+                # len
+                (["#main", "int[] i = [1,2,3,4]", "print(len(i))"], "4"),
+                (["#main", "int[] i = [1,2,3,4]", "print(len(i)+1)"], "5"),
+                (["#main", "int[] i = [1,2,3,4]", "print(len(i)+1)", "print(len(i))"], "5\n4"),
+
 
                 ]
         multiprocess_output(code)
