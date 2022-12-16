@@ -1,0 +1,49 @@
+StartCharacter: < (als byte: 60)
+EndCharacter: > (als byte: 62)
+ResponseStartCharacter: ? (als byte: 63)
+ResponseEndCharacter: ! (als byte: 33)
+SpaceCharacter: | (als byte: 124)
+Instruction + Value:
+    a (97): analogRead (Value Analog Port from '0' to '5' (48 to 53)
+    b (98) : analogWrite (Value Digital Port from '0' to '13' (48 to 53), value from 0 to 255
+    c (99) : digitalRead (Value Digital Port from '0' to '13' (48 to 53)
+    d (100) : digitalWrite (Value Digital Port from '0' to '13' (48 to 53), value 0 or 1
+    e (101) : pinMode (Value Digital Port from '0' to '13' (48 to 53)
+    f (102) : getInt (Value Variable ID (4 bytes))
+    g (103) : getFloat (Value Variable ID (4 bytes))
+    h (104) : getChar (Value Variable ID (4 bytes))
+    i (105) : getIntArray (Value Variable ID (4 bytes))
+    j (106) : getFloatArray (Value Variable ID (4 bytes))
+    k (107) : getCharArray (Value Variable ID (4 bytes))
+    l (109) : print (Value Chars)
+Request ID: 1 bytes, 0 - 50 von PC aus, 51 - 100 von Arduino aus
+Error:
+    Unexpected Char:
+Serial Request:
+
+StartCharacter  1
+Request ID      1
+SpaceCharacter  1
+SizeValue (in bytes)  1
+SpaceCharacter  1
+Instruction     1
+SpaceCharacter  1
+Value           SizeValue
+EndCharacter    1
+
+Size: 8 + SizeValue
+
+Serial Response:
+
+StartCharacter  1
+Request ID      1
+SpaceCharacter  1
+SizeResponse (in bytes) 1
+SpaceCharacter  1
+Response        SizeResponse
+EndCharacter    1
+
+Size: 6 + SizeResponse
+
+
+
