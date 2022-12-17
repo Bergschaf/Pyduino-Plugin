@@ -522,12 +522,12 @@ class Utils:
         :return: "",-1 if there is an error
         """
         value = value.strip()
+        if len(value) == 0:
+            return "", None
 
         if self.check_function_execution(value) is not None:
             return self.check_function_execution(value)
 
-        if len(value) == 0:
-            return "", None
 
         if value.count("'") % 2 == 1:
             self.errors.append(Error("Expected \"'\" after character", self.Variables.currentLineIndex,
@@ -590,7 +590,6 @@ class Utils:
                     valueList.append(("(", "operator"))
                 elif lastsplit != len(value):
                     valueList.append(self.do_value(value[lastsplit:]))
-            print("valuelist: ", valueList)
             if "(" in [x[0] for x in valueList]:
                 newValueList = []
                 lastsplit = 0
@@ -598,18 +597,32 @@ class Utils:
                 for i in iterator:
                     if valueList[i][0] == "(":
                         closing_bracket = self.find_closing_bracket_in_value([x[0] for x in valueList], "(", i)
-                        for i in range(lastsplit, i):
-                            newValueList.append(valueList[i])
+                        for ii in range(lastsplit, i):
+                            newValueList.append(valueList[ii])
                         value, dt = self.do_value("".join([x[0] for x in valueList[i + 1:closing_bracket]]))
                         newValueList.append((f"({value})", dt))
                         lastsplit = closing_bracket + 1
                         for _ in range(i, closing_bracket):
                             next(iterator)
-
+                for i in range(lastsplit, len(valueList)):
+                    newValueList.append(valueList[i])
+                valueList = newValueList.copy()
             for o in Constants.OPERATION_ORDER:
                 while True:
                     for i in range(len(valueList)):
                         if valueList[i][1] == "operator" and valueList[i][0] in o:
+                            # Negation
+                            if (valueList[i-1][0] in "()" or i == 0) and valueList[i][0] in "+-":
+                                if valueList[i+1][1] in Constants.NUMERIC_TYPES:
+                                    valueList[i+1] = (f"{valueList[i][0]}({valueList[i + 1][0]})", valueList[i+1][1])
+                                    del valueList[i]
+                                else:
+                                    self.errors.append(Error("Can't negate this type", self.Variables.currentLineIndex,
+                                                             self.Variables.currentLine.find(valueList[i][0], after_col),
+                                                             end_column=self.Variables.currentLine.find(valueList[i][0], after_col) + len(valueList[i][0]),
+                                                             line_offset=self.line_offset))
+                                break
+                            # Normal operation
                             res = self.do_operation(valueList[i - 1], valueList[i + 1], valueList[i])
                             valueList[i - 1] = res
                             del valueList[i + 1]
@@ -617,7 +630,6 @@ class Utils:
                             break
                     else:
                         break
-            print("valuelist: ", valueList, value)
             return valueList[0][0], valueList[0][1]
 
         if value[0] in Constants.NUMBERS:

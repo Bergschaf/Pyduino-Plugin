@@ -73,6 +73,19 @@ class Tests(unittest.TestCase):
                 (["#main", "int i = 2", "int j = 4", "print(i>=j)"], "0"),
                 (["#main", "int i = 2", "int j = 4", "print(i<j and i>j)"], "0"),
                 (["#main", "int i = 2", "int j = 4", "print(i<j or i>j)"], "1"),  # TODO implement not operator
+
+                # - sign
+                (["#main", "print((-2 + 2) * (-2))"], "0"),
+                (["#main", "print(-2 + 2 * (-2))"], "-6"),
+                (["#main", "int[] i = [1,2,3,4]", "print(-i[0])"], "-1"),
+                (["#main", "int[] i = [1,2,3,4]", "print(-len(i))"], "-4"),
+                (["#main", "int[] i = [1,2,3,4]", "print(-i[0]+i[1])"], "1"),
+                (["#main", "int[] i = [1,2,3,4]", "print(-i[0]+len(i))"], "-3"),
+                (["#main", "print(-2**2)"], "-4"),
+                (["#main", "print(-2/2)"], "-1"),
+                (["#main", "print(-(2 * 2 * (-2)))"], "8"),
+                (["#main", "print(-(((2)) * 2 * (-2)))"], "8"),
+
                 # If
                 (["#main", "int i = 2", "if i == 2:", "    print(1)"], "1"),
                 (["#main", "int i = 2", "if i == 1:", "    print(1)", "else:", "    print(2)"], "2"),
@@ -117,6 +130,7 @@ class Tests(unittest.TestCase):
                     "print(array)"], "[1, 2, 3, 4, 5, 6]")
                ]
         multiprocess_output(code)
+
 
 
 if __name__ == '__main__':
