@@ -32,8 +32,6 @@
 				"match":"\\b(\\d+)\\b"
 			},
 
-			
-			
 			{
 				"name": "support.function.builtin.pyduino.arduino",
 			    "match": "\\b(print|analogWrite|analogRead|digitalWrite|digitalRead|delay)\\b"
@@ -41,8 +39,19 @@
 			{
 				"name": "support.function.builtin.pyduino.general",
 				"match": "\\b(len|sum|range)\\b"
-			}
+			},
+
+			{
+				"name": "storage.modifier.pyduino",
+				"match": "(#main|#board)"
+			},
+
 			
+			{
+				"name":"comment.line.number-sign.pyduino",
+				"match":"#.*$" 
+			}
+
 			]
 			
 			

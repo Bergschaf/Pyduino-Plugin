@@ -95,7 +95,6 @@ def _validate_pyduino(source):
 
     print("errors", "\n".join([str(error) for error in compiler_pc.errors]))
     return errors
-    #return [Error("test",1,3,end_column=7).get_Diagnostic()]
 
 @json_server.feature(COMPLETION)  # comment  , CompletionOptions(trigger_characters=[',']))
 def completions(ls, params: Optional[CompletionParams] = None) -> CompletionList:
