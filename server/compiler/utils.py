@@ -509,6 +509,7 @@ class Utils:
                                          end_column=self.Variables.currentLine.find(right[0], after_col) + len(
                                              right[0]), line_offset=self.line_offset))
             return "", "bool"
+        print("current line ", self.Variables.currentLine)
         self.errors.append(Error("Can't use operator on these types", self.Variables.currentLineIndex,
                                  self.Variables.currentLine.find(left[0], after_col) + len(left[0]),
                                  end_column=self.Variables.currentLine.find(right[0], after_col) + len(right[0]),
@@ -609,7 +610,7 @@ class Utils:
                 valueList = newValueList.copy()
             for o in Constants.OPERATION_ORDER:
                 while True:
-                    for i in range(len(valueList)):
+                    for i in range(len(valueList)-1):
                         if valueList[i][1] == "operator" and valueList[i][0] in o:
                             # Negation
                             if (valueList[i-1][0] in "()" or i == 0) and valueList[i][0] in "+-":

@@ -15,7 +15,7 @@ class Error:
     def get_Diagnostic(self):
         return Diagnostic(range=Range(
                 start=Position(line=self.line + self.line_offset, character=self.column),
-                end=Position(line=self.end_line+ self.line_offset, character=self.end_line)
+                end=Position(line=self.end_line+ self.line_offset, character=self.end_column)
             ),
             message=self.message,
             source="Pyduino Languge server"
