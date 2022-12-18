@@ -391,6 +391,7 @@ class Utils:
         else:
             end_indentation_index = self.Variables.totalLineCount - 1
 
+        range_options = False # range has three arguments
         if elements[1][:5] == "range":
             if elements[1][5] != "(":
                 self.errors.append(Error("Expected '(' after range", self.Variables.currentLineIndex,
@@ -418,8 +419,14 @@ class Utils:
                 for_code = [
                     f"for (int {counter_variable} = {range_arguments[0][0]}; {counter_variable} < {range_arguments[1][0]} ; {counter_variable}++) {{"]
             elif len(range_arguments) == 3:
+                # should also work if the third argument is negative and the first argument is greater than the second
+                range_options = True
                 for_code = [
-                    f"for (int {counter_variable} = {range_arguments[0][0]}; {counter_variable} < {range_arguments[1][0]} ; {counter_variable} += {range_arguments[2][0]}) {{"]
+                    f"if ({range_arguments[0][0]} < {range_arguments[1][0]}) {{",
+                    f"for (int {counter_variable} = {range_arguments[0][0]}; {counter_variable} < {range_arguments[1][0]} ; {counter_variable} += {range_arguments[2][0]}) {{",
+                    "} else {",
+                    f"for (int {counter_variable} = {range_arguments[0][0]}; {counter_variable} > {range_arguments[1][0]} ; {counter_variable} += {range_arguments[2][0]}) {{",
+                    "}"]
             else:
                 self.errors.append(Error("Expected 1 or 2 arguments in 'range'", self.Variables.currentLineIndex,
                                          self.Variables.currentLine.find("range") + 5,

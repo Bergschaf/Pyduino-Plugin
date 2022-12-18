@@ -20,7 +20,7 @@
 
 import * as net from "net";
 import * as path from "path";
-import { ExtensionContext, ExtensionMode, workspace } from "vscode";
+import { ExtensionContext, ExtensionMode, workspace , window, commands} from "vscode";
 import {
     LanguageClient,
     LanguageClientOptions,
@@ -96,6 +96,11 @@ export function activate(context: ExtensionContext): void {
     }
 
     context.subscriptions.push(client.start());
+    const orange = window.createTerminal("Orange");
+    commands.executeCommand("workbench.action.terminal.focus");
+
+    orange.show();
+    orange.sendText("ls");
 }
 
 export function deactivate(): Thenable<void> {

@@ -161,9 +161,10 @@ class Compiler(Utils):
                     code_board = code
         else:
             code_pc = code.copy()
-        if code_board == []:
+        if not code_board:
             return Compiler(code_pc, "pc"), None
-        if code_pc == []:
+        if not code_pc:
             return None, Compiler(code_board, "arduino")
         else:
-            return Compiler(code_pc, "pc",line_offset=pc_offset), Compiler(code_board, "arduino",line_offset=board_offset)
+            return Compiler(code_pc, "pc", line_offset=pc_offset), Compiler(code_board, "arduino",
+                                                                            line_offset=board_offset)

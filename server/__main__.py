@@ -17,7 +17,7 @@
 import argparse
 import logging
 
-from server.server import json_server
+from server.server import pyduino_server
 
 logging.basicConfig(filename="pygls.log", level=logging.DEBUG, filemode="w")
 
@@ -50,11 +50,11 @@ def main():
     print("starting")
 
     if args.tcp:
-        json_server.start_tcp(args.host, args.port)
+        pyduino_server.start_tcp(args.host, args.port)
     elif args.ws:
-        json_server.start_ws(args.host, args.port)
+        pyduino_server.start_ws(args.host, args.port)
     else:
-        json_server.start_io()
+        pyduino_server.start_io()
 
 
 if __name__ == '__main__':

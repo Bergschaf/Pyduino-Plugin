@@ -24,6 +24,7 @@
                 "reveal": "never"
             },
             "problemMatcher": ["$tsc-watch"]
-        }
+        },
+
     ]
 }

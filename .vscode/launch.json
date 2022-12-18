@@ -1,13 +1,18 @@
 {
     "version": "0.2.0",
     "configurations": [
+        
         {
             "name": "Launch Client",
             "type": "extensionHost",
             "request": "launch",
             "runtimeExecutable": "${execPath}",
-            "args": ["--extensionDevelopmentPath=${workspaceRoot}"],
-            "outFiles": ["${workspaceRoot}/client/out/**/*.js"],
+            "args": [
+                "--extensionDevelopmentPath=${workspaceRoot}"
+            ],
+            "outFiles": [
+                "${workspaceRoot}/client/out/**/*.js"
+            ],
             "preLaunchTask": {
                 "type": "npm",
                 "script": "compile"
@@ -21,7 +26,9 @@
             "type": "python",
             "request": "launch",
             "module": "server",
-            "args": ["--tcp"],
+            "args": [
+                "--tcp"
+            ],
             "justMyCode": false,
             "python": "${command:python.interpreterPath}",
             "cwd": "${workspaceFolder}",
@@ -34,19 +41,26 @@
             "type": "python",
             "request": "launch",
             "module": "server",
-            "args": ["--ws"],
+            "args": [
+                "--ws"
+            ],
             "justMyCode": false,
             "python": "${command:python.interpreterPath}",
             "cwd": "${workspaceFolder}",
             "env": {
                 "PYTHONPATH": "${workspaceFolder}"
             }
-        }
+        },
+
+
     ],
     "compounds": [
         {
             "name": "Server + Client",
-            "configurations": ["Launch Server", "Launch Client"]
+            "configurations": [
+                "Launch Server",
+                "Launch Client"
+            ]
         }
     ]
 }

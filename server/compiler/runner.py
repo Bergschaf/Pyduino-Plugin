@@ -1,7 +1,12 @@
 import subprocess
 import os
 from server.compiler.compiler import Compiler
+import sys
 
+if __name__ == "__main__":
+    print("main")
+else:
+    print("not main")
 
 class Runner:
     def __init__(self, compiler_pc, compiler_board, runner_id=0):
@@ -9,6 +14,7 @@ class Runner:
         self.compiler_board = compiler_board
         self.connection_needed = False
         self.runner_id = runner_id
+        self.board = None
 
     def compile(self):
         if self.compiler_pc is not None and self.compiler_board is not None:
@@ -57,23 +63,28 @@ class Runner:
             os.mkdir("temp")
         with open("temp/temp.ino", "w") as f:
             f.write(code)
+        self.board = self.get_boards()[0]  # TODO select right option
         subprocess.run(
-            ["server/compiler/arduino-cli", "compile", "-b", "arduino:avr:uno", "--fqbn", "arduino:avr:uno", "temp"])
+            ["server/compiler/arduino-cli", "compile", "--fqbn", self.board[1], "temp"])
 
     @staticmethod
-    def get_port():
-        # TODO selet option
-        return ["".join([x for i, x in enumerate(p) if not any([y == " " for y in p[:i + 1]])]) for p in
-                subprocess.run(["server/compiler/arduino-cli", "board", "list"], capture_output=True).stdout.decode(
-                    "utf-8").split("\n")[1:] if "arduino" in p][0]
+    def get_boards():
+        # TODO select option
+        boards = [p.split(" ") for p in
+                  subprocess.run(["server/compiler/arduino-cli", "board", "list"], capture_output=True).stdout.decode(
+                      "utf-8").split("\n")[1:] if "arduino" in p]
+        if len(boards) == 0:
+            raise Exception("No boards found, connect a board and try again")
+        return [(b[0], b[-2]) for b in boards]
 
     def get_output_pc(self):
         self.compile_pc()
         return subprocess.getoutput(f"temp_{self.runner_id}.exe")
 
     def run_board(self):
+
         subprocess.run(
-            ["server/compiler/arduino-cli", "upload", "-b", "arduino:avr:uno", "-p", self.get_port(), "temp"])
+            ["server/compiler/arduino-cli", "upload", "-b", self.board[1], "-p", self.board[0], "temp"])
 
     def stop(self):
         subprocess.run(["taskkill", "/f", "/im", f"temp_{self.runner_id}.exe"])
@@ -81,7 +92,7 @@ class Runner:
 
     def clear(self):
         try:
-            os.remove(f"temp_{self.runner_id}.exe")
             os.remove(f"temp_{self.runner_id}.cpp")
+            os.remove(f"temp_{self.runner_id}.exe")
         except Exception:
             print("Error deleting files")

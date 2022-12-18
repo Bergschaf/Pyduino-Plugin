@@ -64,7 +64,7 @@ class PyduinoLanguageServer(LanguageServer):
         super().__init__(*args)
 
 
-json_server = PyduinoLanguageServer('pygls-pyduino-example', 'v0.1')
+pyduino_server = PyduinoLanguageServer('pygls-pyduino-example', 'v0.1')
 
 
 def get_compiler(ls):
@@ -96,7 +96,7 @@ def _validate_pyduino(source):
     print("errors", "\n".join([str(error) for error in compiler_pc.errors]))
     return errors
 
-@json_server.feature(COMPLETION)  # comment  , CompletionOptions(trigger_characters=[',']))
+@pyduino_server.feature(COMPLETION)  # comment  , CompletionOptions(trigger_characters=[',']))
 def completions(ls, params: Optional[CompletionParams] = None) -> CompletionList:
     print("complete")
     """Returns completion items."""
@@ -112,7 +112,7 @@ def completions(ls, params: Optional[CompletionParams] = None) -> CompletionList
     )
 
 
-@json_server.command(PyduinoLanguageServer.RUN_PYDUINO)
+@pyduino_server.command(PyduinoLanguageServer.RUN_PYDUINO)
 def runPyduino(ls, *args):
     if PyduinoLanguageServer.runner is not None:
         PyduinoLanguageServer.runner.stop()
@@ -124,33 +124,33 @@ def runPyduino(ls, *args):
         print(e)
         PyduinoLanguageServer.runner = None
 
-@json_server.command(PyduinoLanguageServer.STOP_PYDUINO)
+@pyduino_server.command(PyduinoLanguageServer.STOP_PYDUINO)
 def stopPyduino(ls, *args):
     if PyduinoLanguageServer.runner:
         PyduinoLanguageServer.runner.stop()
         PyduinoLanguageServer.runner = None
 
 
-@json_server.feature(TEXT_DOCUMENT_DID_CHANGE)
+@pyduino_server.feature(TEXT_DOCUMENT_DID_CHANGE)
 def did_change(ls, params: DidChangeTextDocumentParams):
     """Text document did change notification."""
     _validate(ls, params)
 
 
-@json_server.feature(TEXT_DOCUMENT_DID_CLOSE)
+@pyduino_server.feature(TEXT_DOCUMENT_DID_CLOSE)
 def did_close(server: PyduinoLanguageServer, params: DidCloseTextDocumentParams):
     """Text document did close notification."""
     server.show_message('Text Document Did Close')
 
 
-@json_server.feature(TEXT_DOCUMENT_DID_OPEN)
+@pyduino_server.feature(TEXT_DOCUMENT_DID_OPEN)
 async def did_open(ls, params: DidOpenTextDocumentParams):
     """Text document did open notification."""
     ls.show_message('Text Document Did Open')
     _validate(ls, params)
 
 
-@json_server.feature(
+@pyduino_server.feature(
     TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL,
     SemanticTokensLegend(
         token_types=["operator"],
@@ -190,7 +190,7 @@ def semantic_tokens(ls: PyduinoLanguageServer, params: SemanticTokensParams):
     return SemanticTokens(data=data)
 
 
-@json_server.command(PyduinoLanguageServer.CMD_PROGRESS)
+@pyduino_server.command(PyduinoLanguageServer.CMD_PROGRESS)
 async def progress(ls: PyduinoLanguageServer, *args):
     """Create and start the progress on the client."""
     token = 'token'
@@ -209,7 +209,7 @@ async def progress(ls: PyduinoLanguageServer, *args):
     ls.progress.end(token, WorkDoneProgressEnd(message='Finished'))
 
 
-@json_server.command(PyduinoLanguageServer.CMD_REGISTER_COMPLETIONS)
+@pyduino_server.command(PyduinoLanguageServer.CMD_REGISTER_COMPLETIONS)
 async def register_completions(ls: PyduinoLanguageServer, *args):
     """Register completions method on the client."""
     params = RegistrationParams(registrations=[
@@ -226,7 +226,7 @@ async def register_completions(ls: PyduinoLanguageServer, *args):
                         MessageType.Error)
 
 
-@json_server.command(PyduinoLanguageServer.CMD_SHOW_CONFIGURATION_ASYNC)
+@pyduino_server.command(PyduinoLanguageServer.CMD_SHOW_CONFIGURATION_ASYNC)
 async def show_configuration_async(ls: PyduinoLanguageServer, *args):
     """Gets exampleConfiguration from the client settings using coroutines."""
     try:
@@ -245,7 +245,7 @@ async def show_configuration_async(ls: PyduinoLanguageServer, *args):
         ls.show_message_log(f'Error ocurred: {e}')
 
 
-@json_server.command(PyduinoLanguageServer.CMD_SHOW_CONFIGURATION_CALLBACK)
+@pyduino_server.command(PyduinoLanguageServer.CMD_SHOW_CONFIGURATION_CALLBACK)
 def show_configuration_callback(ls: PyduinoLanguageServer, *args):
     """Gets exampleConfiguration from the client settings using callback."""
 
@@ -265,8 +265,8 @@ def show_configuration_callback(ls: PyduinoLanguageServer, *args):
     ]), _config_callback)
 
 
-@json_server.thread()
-@json_server.command(PyduinoLanguageServer.CMD_SHOW_CONFIGURATION_THREAD)
+@pyduino_server.thread()
+@pyduino_server.command(PyduinoLanguageServer.CMD_SHOW_CONFIGURATION_THREAD)
 def show_configuration_thread(ls: PyduinoLanguageServer, *args):
     """Gets exampleConfiguration from the client settings using thread pool."""
     try:
@@ -284,7 +284,7 @@ def show_configuration_thread(ls: PyduinoLanguageServer, *args):
         ls.show_message_log(f'Error ocurred: {e}')
 
 
-@json_server.command(PyduinoLanguageServer.CMD_UNREGISTER_COMPLETIONS)
+@pyduino_server.command(PyduinoLanguageServer.CMD_UNREGISTER_COMPLETIONS)
 async def unregister_completions(ls: PyduinoLanguageServer, *args):
     """Unregister completions method on the client."""
     params = UnregistrationParams(unregisterations=[
