@@ -16,7 +16,7 @@
 ############################################################################
 import asyncio
 import re
-import time
+import os
 import uuid
 from typing import Optional
 
@@ -45,6 +45,23 @@ print("Starting server...")
 
 COUNT_DOWN_START_IN_SECONDS = 10
 COUNT_DOWN_SLEEP_IN_SECONDS = 1
+
+LAUNCH_JSON = """{
+    "configurations": [
+        {
+            "name":"test",
+            "type": "python",
+            "request": "launch",
+            "program": "${extensionInstallFolder:Bergschaf.pyduino-extension}/main.py",
+            "cwd": "${extensionInstallFolder:Bergschaf.pyduino-extension}",
+            "args": [
+                "${file}"
+            ],
+            "console": "internalConsole",
+            "internalConsoleOptions": "openOnSessionStart"
+        }
+    ]   
+}"""
 
 
 class PyduinoLanguageServer(LanguageServer):
@@ -147,6 +164,14 @@ def did_close(server: PyduinoLanguageServer, params: DidCloseTextDocumentParams)
 async def did_open(ls, params: DidOpenTextDocumentParams):
     """Text document did open notification."""
     ls.show_message('Text Document Did Open')
+    text_doc = ls.workspace.get_document(list(ls.workspace.documents.keys())[0])
+    base_path = os.path.dirname(text_doc.path)
+
+    if not os.path.exists(base_path + "\\\\.vscode"):
+        os.mkdir(base_path + "\\\\.vscode")
+    with open(base_path + "\\\\.vscode\\\\launch.json", "w") as f:
+        f.write(LAUNCH_JSON)
+    print("open",base_path)
     _validate(ls, params)
 
 

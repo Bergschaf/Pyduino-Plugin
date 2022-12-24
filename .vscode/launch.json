@@ -33,7 +33,7 @@
             "python": "${command:python.interpreterPath}",
             "cwd": "${workspaceFolder}",
             "env": {
-                "PYTHONPATH": "${workspaceFolder}"
+                "python.PYTHONPATH": "${workspaceFolder}"
             }
         },
         {
@@ -48,7 +48,7 @@
             "python": "${command:python.interpreterPath}",
             "cwd": "${workspaceFolder}",
             "env": {
-                "PYTHONPATH": "${workspaceFolder}"
+                "python.PYTHONPATH": "${workspaceFolder}"
             }
         },
 
