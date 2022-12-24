@@ -132,6 +132,5 @@ class Tests(unittest.TestCase):
         multiprocess_output(code)
 
 
-
 if __name__ == '__main__':
     unittest.main()

@@ -391,7 +391,7 @@ class Utils:
         else:
             end_indentation_index = self.Variables.totalLineCount - 1
 
-        range_options = False # range has three arguments
+        range_three = False # range has three arguments
         if elements[1][:5] == "range":
             if elements[1][5] != "(":
                 self.errors.append(Error("Expected '(' after range", self.Variables.currentLineIndex,
@@ -420,13 +420,11 @@ class Utils:
                     f"for (int {counter_variable} = {range_arguments[0][0]}; {counter_variable} < {range_arguments[1][0]} ; {counter_variable}++) {{"]
             elif len(range_arguments) == 3:
                 # should also work if the third argument is negative and the first argument is greater than the second
-                range_options = True
+                range_three = True
                 for_code = [
                     f"if ({range_arguments[0][0]} < {range_arguments[1][0]}) {{",
-                    f"for (int {counter_variable} = {range_arguments[0][0]}; {counter_variable} < {range_arguments[1][0]} ; {counter_variable} += {range_arguments[2][0]}) {{",
-                    "} else {",
-                    f"for (int {counter_variable} = {range_arguments[0][0]}; {counter_variable} > {range_arguments[1][0]} ; {counter_variable} += {range_arguments[2][0]}) {{",
-                    "}"]
+                    f"for (int {counter_variable} = {range_arguments[0][0]}; {counter_variable} < {range_arguments[1][0]} ; {counter_variable} += {range_arguments[2][0]}) {{"]
+
             else:
                 self.errors.append(Error("Expected 1 or 2 arguments in 'range'", self.Variables.currentLineIndex,
                                          self.Variables.currentLine.find("range") + 5,
@@ -449,9 +447,16 @@ class Utils:
         [self.Variables.code_done.append(x) for x in for_code]
         self.Variables.inLoop += 1
         self.Variables.inIndentation += 1
+        start_len = len(self.Variables.code_done)
         while self.Variables.currentLineIndex < end_indentation_index:
             self.Variables.currentLineIndex, l = next(self.Variables.iterator)
             self.Variables.code_done.append(self.do_line(l))
+
+        if range_three:
+            self.Variables.code_done.extend(["}", "}", "else {", f"for (int {counter_variable} = {range_arguments[0][0]}; {counter_variable} > {range_arguments[1][0]} ; {counter_variable} += {range_arguments[2][0]}) {{"])
+            self.Variables.code_done.extend(self.Variables.code_done[start_len:-4])
+            self.Variables.code_done.append("}")
+
         self.Variables.inLoop -= 1
         self.Variables.inIndentation -= 1
         return "}\n"
