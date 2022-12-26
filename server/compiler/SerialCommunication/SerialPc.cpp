@@ -189,6 +189,7 @@ class Arduino {
         if(instruction == 'l'){
             cout << "[Arduino:] " <<  value;
         }
+        cout << endl;
 
     }
 
@@ -256,7 +257,6 @@ public:
         if (!SP->IsConnected()) {
                 cout << "Connection Error" << endl;
         }
-        cout << "Connection Established" << endl;
         if (!Handshake()) {
             cout << "Handshake Failed" << endl;
             return;
