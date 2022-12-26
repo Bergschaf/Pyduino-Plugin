@@ -78,29 +78,34 @@ function startLangServer(
 }
 
 export function activate(context: ExtensionContext): void {
-    if (context.extensionMode === ExtensionMode.Development) {
+    let mode = "echo test";
+
+    if (false) { //  (context.extensionMode === ExtensionMode.Development) {
         // Development - Run the server manually
         client = startLangServerTCP(2087);
+        mode = "echo development";
     } else {
         // Production - Client is going to run the server (for use within `.vsix` package)
         const cwd = path.join(__dirname, "..", "..");
-        const pythonPath = workspace
-            .getConfiguration("python")
-            .get<string>("pythonPath");
+        const pythonPath = "env/Scripts/python.exe"
+        //const pythonPath = workspace
+        //    .getConfiguration("python")
+        //    .get<string>("pythonPath");
 
         if (!pythonPath) {
-            throw new Error("`python.pythonPath` is not set");
+            //throw new Error("`python.pythonPath` is not set");
         }
 
         client = startLangServer(pythonPath, ["-m", "server"], cwd);
+        mode = "echo production";
     }
 
     context.subscriptions.push(client.start());
     const orange = window.createTerminal("Orange");
-    commands.executeCommand("workbench.action.terminal.focus");
-
+    orange.sendText(mode);
     orange.show();
-    orange.sendText("ls");
+
+
 }
 
 export function deactivate(): Thenable<void> {

@@ -4,9 +4,9 @@
   "author": "Bergschaf",
   "repository": "https://github.com/Bergschaf/Pyduino-Plugin",
   "license": "Apache-2.0",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "activationEvents": [
-    "onLanguage:pyduino"
+      "onLanguage:pyduino"
   ],
   "publisher": "Bergschaf",
   "engines": {
@@ -19,7 +19,8 @@
     "commands": [
       {
         "command": "runPyduino",
-        "title": "run pyduino"
+        "title": "run pyduino",
+        "icon":  "$(play)"
       },
       {
         "command": "stopPyduino",
@@ -50,6 +51,12 @@
         "title": "Unregister completions"
       }
     ],
+    "menus": {
+      "editor/title/run": [{
+        "command":"runPyduino"
+      }]
+    },
+
     "files.associations": {
       "*.pino": "pyduino"
     },

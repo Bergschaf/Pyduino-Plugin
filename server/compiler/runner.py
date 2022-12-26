@@ -3,11 +3,6 @@ import os
 from server.compiler.compiler import Compiler
 import sys
 
-if __name__ == "__main__":
-    print("main")
-else:
-    print("not main")
-
 class Runner:
     def __init__(self, compiler_pc, compiler_board, runner_id=0):
         self.compiler_pc = compiler_pc
@@ -56,7 +51,8 @@ class Runner:
     def compile_board(self):
         self.compiler_board.compile()
         if self.compiler_board.errors:
-            raise Exception("Compiler error")
+            print("Compiler error")
+            exit()
         self.connection_needed = True if self.compiler_board.Variables.connection_needed else self.connection_needed
         code = self.compiler_board.finish(self.connection_needed)
         if not os.path.exists("temp"):
@@ -74,7 +70,11 @@ class Runner:
                   subprocess.run(["server/compiler/arduino-cli", "board", "list"], capture_output=True).stdout.decode(
                       "utf-8").split("\n")[1:] if "arduino" in p]
         if len(boards) == 0:
-            raise Exception("No boards found, connect a board and try again")
+            print("No boards found, connect a board and try again")
+            exit()
+        print("Boards found:")
+        for i, b in enumerate(boards):
+            print(f"{i + 1}. {b[0]} - {b[-2]}")
         return [(b[0], b[-2]) for b in boards]
 
     def get_output_pc(self):

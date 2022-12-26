@@ -52,6 +52,7 @@ LAUNCH_JSON = """{
             "name":"test",
             "type": "python",
             "request": "launch",
+            "python": "${extensionInstallFolder:Bergschaf.pyduino-extension}/env/Scripts/python.exe",
             "program": "${extensionInstallFolder:Bergschaf.pyduino-extension}/main.py",
             "cwd": "${extensionInstallFolder:Bergschaf.pyduino-extension}",
             "args": [

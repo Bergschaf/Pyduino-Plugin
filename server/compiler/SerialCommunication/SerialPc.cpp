@@ -65,12 +65,10 @@ class Arduino {
         char incomingData[2] = "";
         int readResult = 0;
         while (true) {
-            cout << "Sending handshake" << endl;
             SP->WriteData(outgoingData, 2);
             sleep_for(milliseconds(2));
             readResult = SP->ReadData(incomingData, 2);
             if (readResult > 0) {
-                cout << "Handshake: " << incomingData << endl;
                 if (incomingData[0] == '*') {
                     outgoingData[0] = 'T';
                     SP->WriteData(outgoingData, 1);
@@ -264,7 +262,7 @@ public:
             return;
         }
         else{
-            cout << "Handshake Successful" << endl;
+            cout << "Connected to board" << endl;
         }
         listenerThread = new thread(listener, this, SP);
     }
