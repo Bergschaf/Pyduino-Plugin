@@ -1,7 +1,7 @@
 import subprocess
 import os
 from server.compiler.compiler import Compiler
-import sys
+
 
 class Runner:
     def __init__(self, compiler_pc, compiler_board, runner_id=0):
@@ -24,6 +24,9 @@ class Runner:
                 self.compile_board()
         elif self.compiler_board is not None:
             self.compile_board()
+            if self.connection_needed:
+                self.compiler_pc = Compiler(["#main"], "pc")
+                self.compile_pc()
 
     def run(self, compiled=False):
         if not compiled:
@@ -36,7 +39,9 @@ class Runner:
     def compile_pc(self):
         self.compiler_pc.compile()
         if self.compiler_pc.errors:
-            raise Exception("Compiler error")
+            print("Compiler error")
+            print("\n".join([str(e) for e in self.compiler_pc.errors]))
+            exit()
         self.connection_needed = True if self.compiler_pc.Variables.connection_needed else self.connection_needed
         code = self.compiler_pc.finish(self.connection_needed)
         with open(f"temp_{self.runner_id}.cpp", "w") as f:
@@ -45,6 +50,8 @@ class Runner:
 
     def run_pc(self):
         # show the output in the vscode terminal
+        cls = lambda: os.system('cls')
+        cls()
         subprocess.Popen(f"temp_{self.runner_id}.exe")
         print("--- Program started ---")
 
@@ -52,6 +59,7 @@ class Runner:
         self.compiler_board.compile()
         if self.compiler_board.errors:
             print("Compiler error")
+            print("\n".join([str(e) for e in self.board.errors]))
             exit()
         self.connection_needed = True if self.compiler_board.Variables.connection_needed else self.connection_needed
         code = self.compiler_board.finish(self.connection_needed)
@@ -82,9 +90,7 @@ class Runner:
         return subprocess.getoutput(f"temp_{self.runner_id}.exe")
 
     def run_board(self):
-
-        subprocess.run(
-            ["server/compiler/arduino-cli", "upload", "-b", self.board[1], "-p", self.board[0], "temp"])
+        subprocess.run(["server/compiler/arduino-cli", "upload", "-b", self.board[1], "-p", self.board[0], "temp"])
 
     def stop(self):
         subprocess.run(["taskkill", "/f", "/im", f"temp_{self.runner_id}.exe"])

@@ -521,7 +521,6 @@ class Utils:
                                          end_column=self.Variables.currentLine.find(right[0], after_col) + len(
                                              right[0]), line_offset=self.line_offset))
             return "", "bool"
-        print("current line ", self.Variables.currentLine)
         self.errors.append(Error("Can't use operator on these types", self.Variables.currentLineIndex,
                                  self.Variables.currentLine.find(left[0], after_col) + len(left[0]),
                                  end_column=self.Variables.currentLine.find(right[0], after_col) + len(right[0]),

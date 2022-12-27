@@ -294,7 +294,6 @@ class BuiltinsPC(Builtins):
                                                                 self.Variables.currentLine
                                                                 , "(", self.Variables.currentLine.index("("))))
         value, dt = args[0]
-        print(dt)
         if dt != "int":
             self.errors.append(
                 Error(f"'delay' argument 1 must be 'int', not {dt}", self.Variables.currentLineIndex,
