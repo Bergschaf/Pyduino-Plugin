@@ -73,10 +73,10 @@ def _validate(ls, params):
     ls.publish_diagnostics(text_doc.uri, diagnostics)
 
 
-def _validate_pyduino(source):
+def _validate_pyduino(ls):
     """Validates json file."""
     errors = []
-    compiler_pc, compiler_board = get_compiler(source)
+    compiler_pc, compiler_board = get_compiler(ls)
     if compiler_pc is not None:
         compiler_pc.compile()
         errors += [error.get_Diagnostic() for error in compiler_pc.errors]
@@ -98,7 +98,6 @@ def completions(ls, params: Optional[CompletionParams] = None) -> CompletionList
 @pyduino_server.feature(TEXT_DOCUMENT_DID_OPEN)
 async def did_open(ls, params: DidOpenTextDocumentParams):
     """Text document did open notification."""
-    ls.show_message('Text Document Did Open')
     text_doc = ls.workspace.get_document(list(ls.workspace.documents.keys())[0])
     base_path = os.path.dirname(text_doc.path)
 

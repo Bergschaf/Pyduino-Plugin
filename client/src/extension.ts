@@ -78,12 +78,10 @@ function startLangServer(
 }
 
 export function activate(context: ExtensionContext): void {
-    let mode = "echo test";
 
     if (false) { //  (context.extensionMode === ExtensionMode.Development) {
         // Development - Run the server manually
         client = startLangServerTCP(2087);
-        mode = "echo development";
     } else {
         // Production - Client is going to run the server (for use within `.vsix` package)
         const cwd = path.join(__dirname, "..", "..");
@@ -97,14 +95,9 @@ export function activate(context: ExtensionContext): void {
         }
 
         client = startLangServer(pythonPath, ["-m", "server"], cwd);
-        mode = "echo production";
     }
 
     context.subscriptions.push(client.start());
-    const orange = window.createTerminal("Orange");
-    orange.sendText(mode);
-    orange.show();
-
 
 }
 

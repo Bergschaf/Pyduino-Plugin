@@ -46,12 +46,10 @@ class Runner:
         code = self.compiler_pc.finish(self.connection_needed)
         with open(f"temp_{self.runner_id}.cpp", "w") as f:
             f.write(code)
-        subprocess.run(["g++", f"temp_{self.runner_id}.cpp", "-o", f"temp_{self.runner_id}.exe"])
+        subprocess.run(["mingw/MinGW/bin/g++.exe", f"temp_{self.runner_id}.cpp", "-o", f"temp_{self.runner_id}.exe"])
 
     def run_pc(self):
         # show the output in the vscode terminal
-        cls = lambda: os.system('cls')
-        cls()
         subprocess.Popen(f"temp_{self.runner_id}.exe")
         print("--- Program started ---")
 
