@@ -4,8 +4,7 @@ import sys
 import pyunpack
 import os
 
-if __name__ == '__main__':
-    file = sys.argv[1]
+def runFile(file):
     if os.listdir("mingw") == ["MinGW.7z"]:
         pyunpack.Archive("mingw/mingw.7z").extractall("mingw")
 
@@ -18,3 +17,8 @@ if __name__ == '__main__':
     compiler_pc, compiler_board = Compiler.get_compiler(code.splitlines())
     runner = Runner(compiler_pc, compiler_board)
     runner.run()
+
+
+if __name__ == '__main__':
+    file = sys.argv[1]
+    runFile(file)

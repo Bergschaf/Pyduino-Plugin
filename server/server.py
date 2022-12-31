@@ -16,11 +16,10 @@
 ############################################################################
 import os
 from typing import Optional
-
-from pygls.lsp.methods import (TEXT_DOCUMENT_DID_OPEN, TEXT_DOCUMENT_DID_CHANGE)
-from pygls.lsp.types import (CompletionList, CompletionParams, DidOpenTextDocumentParams,DidChangeTextDocumentParams)
-
 from pygls.server import LanguageServer
+from lsprotocol.types import (TEXT_DOCUMENT_DID_OPEN, TEXT_DOCUMENT_DID_CHANGE)
+from lsprotocol.types import (CompletionList, CompletionParams, DidOpenTextDocumentParams,DidChangeTextDocumentParams)
+
 
 from server.compiler.compiler import Compiler
 
