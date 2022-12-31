@@ -186,7 +186,7 @@ class BuiltinsPC(Builtins):
                                                                     self.Variables.currentLine
                                                                     , "(", self.Variables.currentLine.index("("))))
 
-        if len(kwargs.keys()) > 0:
+        elif len(kwargs.keys()) > 0:
             self.errors.append(
                 Error(f"'print' got an unexpected keyword argument", self.Variables.currentLineIndex,
                       self.Variables.currentLine.index("print") + 6, end_column=
