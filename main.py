@@ -1,5 +1,5 @@
 from server.compiler.runner import Runner
-from server.compiler.compiler import Compiler
+from server.compiler.transpiler import Transpiler
 import sys
 import pyunpack
 import os
@@ -14,7 +14,7 @@ def runFile(file):
     with open(file, "r") as f:
         code = f.read()
 
-    compiler_pc, compiler_board = Compiler.get_compiler(code.splitlines())
+    compiler_pc, compiler_board = Transpiler.get_transpiler(code.splitlines())
     runner = Runner(compiler_pc, compiler_board)
     runner.run()
 

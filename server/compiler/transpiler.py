@@ -4,7 +4,7 @@ from server.compiler.variables import Variables
 from server.compiler.error import Error
 
 
-class Compiler(Utils):
+class Transpiler(Utils):
     def __init__(self, code: list, mode: str, variables: Variables = None, line_offset=0):
         if variables is None:
             self.Variables = Variables()
@@ -21,7 +21,7 @@ class Compiler(Utils):
         super().__init__(self.Variables, builtins, self.errors)
         self.code = code
         self.mode = mode
-        self.compiling = False
+        self.transpiling = False
         self.line_offset = line_offset
         self.intialize()
 
@@ -60,11 +60,11 @@ class Compiler(Utils):
         self.Variables.iterator = enumerate(self.Variables.code)
         self.Variables.code_done = []
 
-    def compile(self):
+    def transpile(self):
         self.errors.clear()
         if self.Variables.totalLineCount == 0:
             return
-        self.compiling = True
+        self.transpiling = True
         self.intialize()
         _, line = next(self.Variables.iterator)
 
@@ -80,7 +80,7 @@ class Compiler(Utils):
         self.Variables.inLoop = 0
         for self.Variables.currentLineIndex, line in self.Variables.iterator:
             self.Variables.code_done.append(self.do_line(line))
-        self.compiling = False
+        self.transpiling = False
 
     def finish(self, connection_needed):
 
@@ -131,11 +131,12 @@ class Compiler(Utils):
         return "\n".join(self.Variables.code_done)
 
     def get_completion(self, line, col):
-        while self.compiling:
+        while self.transpiling:
             pass
+        raise NotImplementedError()
 
     @staticmethod
-    def get_compiler(code: list):
+    def get_transpiler(code: list):
         code_pc = []
         code_board = []
         code = [i.replace("\n", "").replace("\r", "") for i in code]
@@ -162,9 +163,9 @@ class Compiler(Utils):
         else:
             code_pc = code.copy()
         if not code_board:
-            return Compiler(code_pc, "pc"), None
+            return Transpiler(code_pc, "pc"), None
         if not code_pc:
-            return None, Compiler(code_board, "arduino")
+            return None, Transpiler(code_board, "arduino")
         else:
-            return Compiler(code_pc, "pc", line_offset=pc_offset), Compiler(code_board, "arduino",
-                                                                            line_offset=board_offset)
+            return Transpiler(code_pc, "pc", line_offset=pc_offset), Transpiler(code_board, "arduino",
+                                                                                line_offset=board_offset)

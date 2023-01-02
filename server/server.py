@@ -21,7 +21,7 @@ from lsprotocol.types import (TEXT_DOCUMENT_DID_OPEN, TEXT_DOCUMENT_DID_CHANGE)
 from lsprotocol.types import (CompletionList, CompletionParams, DidOpenTextDocumentParams,DidChangeTextDocumentParams)
 
 
-from server.compiler.compiler import Compiler
+from server.compiler.transpiler import Transpiler
 
 print("Starting server...")
 
@@ -61,7 +61,7 @@ pyduino_server = PyduinoLanguageServer('pygls-pyduino-example', 'v0.1')
 def get_compiler(ls):
     text_doc = ls.workspace.get_document(list(ls.workspace.documents.keys())[0])
     source = text_doc.source
-    return Compiler.get_compiler(source.split("\n"))
+    return Transpiler.get_transpiler(source.split("\n"))
 
 
 def _validate(ls, params):
@@ -77,11 +77,11 @@ def _validate_pyduino(ls):
     errors = []
     compiler_pc, compiler_board = get_compiler(ls)
     if compiler_pc is not None:
-        compiler_pc.compile()
+        compiler_pc.transpile()
         errors += [error.get_Diagnostic() for error in compiler_pc.errors]
 
     if compiler_board is not None:
-        compiler_board.compile()
+        compiler_board.transpile()
         errors += [error.get_Diagnostic() for error in compiler_board.errors]
 
     print("errors", "\n".join([str(error) for error in compiler_pc.errors]))

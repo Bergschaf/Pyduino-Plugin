@@ -1,12 +1,12 @@
 import unittest
-from compiler import Compiler
+from transpiler import Transpiler
 from runner import Runner
 import multiprocessing
 
 
 def compilation(code, expected, connection_needed=False):
-    compiler = Compiler(code, "pc")
-    compiler.compile()
+    compiler = Transpiler(code, "pc")
+    compiler.transpile()
     if compiler.errors:
         raise Exception("Compiler error ", [str(e) for e in compiler.errors])
     code = compiler.finish(connection_needed)
@@ -14,8 +14,8 @@ def compilation(code, expected, connection_needed=False):
 
 
 def output(code, expected, runner_id=0):
-    compiler = Compiler(code, "pc")
-    compiler.compile()
+    compiler = Transpiler(code, "pc")
+    compiler.transpile()
     if compiler.errors:
         # print in the color red
         print("\n\n\n", "\n".join([str(e) for e in compiler.errors]), "\n\n\n")

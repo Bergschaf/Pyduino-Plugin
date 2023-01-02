@@ -1,5 +1,6 @@
 from lsprotocol.types import (Range,Position,Diagnostic)
 
+
 class Error:
     def __init__(self, message, line, column, end_line=None, end_column=None, line_offset=0):
         self.message = message

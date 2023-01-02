@@ -1,49 +1,49 @@
 import subprocess
 import os
-from server.compiler.compiler import Compiler
+from server.compiler.transpiler import Transpiler
 
 
 class Runner:
-    def __init__(self, compiler_pc, compiler_board, runner_id=0):
-        self.compiler_pc = compiler_pc
-        self.compiler_board = compiler_board
+    def __init__(self, transpiler_pc, transpiler_board, runner_id=0):
+        self.transpiler_pc = transpiler_pc
+        self.transpiler_board = transpiler_board
         self.connection_needed = False
         self.runner_id = runner_id
         self.board = None
 
     def compile(self):
-        if self.compiler_pc is not None and self.compiler_board is not None:
-            self.compiler_board.compile()
-            self.connection_needed = self.compiler_board.Variables.connection_needed
+        if self.transpiler_pc is not None and self.transpiler_board is not None:
+            self.transpiler_board.transpile()
+            self.connection_needed = self.transpiler_board.Variables.connection_needed
             self.compile_pc()
             self.compile_board()
-        elif self.compiler_pc is not None:
+        elif self.transpiler_pc is not None:
             self.compile_pc()
             if self.connection_needed:
-                self.compiler_board = Compiler(["#board"], "arduino")
+                self.transpiler_board = Transpiler(["#board"], "arduino")
                 self.compile_board()
-        elif self.compiler_board is not None:
+        elif self.transpiler_board is not None:
             self.compile_board()
             if self.connection_needed:
-                self.compiler_pc = Compiler(["#main"], "pc")
+                self.transpiler_pc = Transpiler(["#main"], "pc")
                 self.compile_pc()
 
     def run(self, compiled=False):
         if not compiled:
             self.compile()
-        if self.compiler_board is not None:
+        if self.transpiler_board is not None:
             self.run_board()
-        if self.compiler_pc is not None:
+        if self.transpiler_pc is not None:
             self.run_pc()
 
     def compile_pc(self):
-        self.compiler_pc.compile()
-        if self.compiler_pc.errors:
+        self.transpiler_pc.transpile()
+        if self.transpiler_pc.errors:
             print("Compiler error")
-            print("\n".join([str(e) for e in self.compiler_pc.errors]))
+            print("\n".join([str(e) for e in self.transpiler_pc.errors]))
             exit()
-        self.connection_needed = True if self.compiler_pc.Variables.connection_needed else self.connection_needed
-        code = self.compiler_pc.finish(self.connection_needed)
+        self.connection_needed = True if self.transpiler_pc.Variables.connection_needed else self.connection_needed
+        code = self.transpiler_pc.finish(self.connection_needed)
         with open(f"temp_{self.runner_id}.cpp", "w") as f:
             f.write(code)
         # print output
@@ -57,13 +57,13 @@ class Runner:
         print("--- Program started ---")
 
     def compile_board(self):
-        self.compiler_board.compile()
-        if self.compiler_board.errors:
+        self.transpiler_board.transpile()
+        if self.transpiler_board.errors:
             print("Compiler error")
             print("\n".join([str(e) for e in self.board.errors]))
             exit()
-        self.connection_needed = True if self.compiler_board.Variables.connection_needed else self.connection_needed
-        code = self.compiler_board.finish(self.connection_needed)
+        self.connection_needed = True if self.transpiler_board.Variables.connection_needed else self.connection_needed
+        code = self.transpiler_board.finish(self.connection_needed)
         if not os.path.exists("temp"):
             os.mkdir("temp")
         with open("temp/temp.ino", "w") as f:
