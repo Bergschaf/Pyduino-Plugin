@@ -1,34 +1,48 @@
-from server.compiler.utils import Utils
-from server.compiler.builtin_functions import BuiltinsArduino, BuiltinsPC
-from server.compiler.variables import Variables
-from server.compiler.error import Error
+from typing import List
+
+from server.transpiler.utils import Utils
+from server.transpiler.builtin_functions import BuiltinsArduino, BuiltinsPC
+from server.transpiler.variables import Variables
+from server.transpiler.error import Error
 
 
 class Transpiler(Utils):
-    def __init__(self, code: list, mode: str, variables: Variables = None, line_offset=0):
+    """
+    Übersetzt den Pyduino Code in C++ Code
+    """
+
+    def __init__(self, code: list[str], mode: str, variables: Variables = None, line_offset: int = 0):
+        """
+        :param code: Der Pyduino Code als Liste von Zeilen
+        :param mode: "arduino" oder "pc"
+        :param variables: Variables object, in dem Daten über den Code gespeichert werden
+        :param line_offset: Offset für die Fehlermeldungen
+        """
         if variables is None:
             self.Variables = Variables()
         else:
             self.Variables = variables
 
-        self.errors: list[Error] = []
+        self.errors: list[Error] = []  # Eine Liste mit allen Fehlern, die während des Transpilierens gefunden werden
         if mode == "arduino":
             builtins = BuiltinsArduino(self.Variables, self.errors)
         elif mode == "pc":
             builtins = BuiltinsPC(self.Variables, self.errors)
         else:
             raise Exception("Invalid mode")
+        # Die Builtins Klasse enthält die Funktionen die in Pyduino verfügbar sind. Diese können von der Platform abhängen.
+
         super().__init__(self.Variables, builtins, self.errors)
-        self.code = code
-        self.mode = mode
-        self.transpiling = False
-        self.line_offset = line_offset
+        self.code: list[str] = code
+        self.mode: str = mode
+        self.transpiling: bool = False
+        self.line_offset: int = line_offset
         self.intialize()
 
     def intialize(self):
+
         """
-        :param variables: Variables object
-        :param code: the code as list of lines
+        Initialisiert die Variablen
         """
         self.Variables.totalLineCount = len(self.code)
         self.Variables.indentations = []
@@ -38,6 +52,8 @@ class Transpiler(Utils):
         self.Variables.code = self.code.copy()
         self.Variables.code_done = []
 
+        # Erstellt die scope Variable, in der die Gültigkeitsbereiche der Variablen gespeichert werden
+        # Format: {(Start, Ende): [[Variablen], [Funktionen]],...}
         current_id_level = 0
         self.Variables.scope = {(0, self.Variables.totalLineCount): [[], []]}
         tempidscope = {(0, self.Variables.totalLineCount): 0}
@@ -56,11 +72,13 @@ class Transpiler(Utils):
                         tempidscope[(pos_i, pos_j + pos_i)] = i
                     break
             current_id_level = i
+
         self.Variables.code = [x.replace("\n", "") for x in self.Variables.code]
         self.Variables.iterator = enumerate(self.Variables.code)
         self.Variables.code_done = []
 
     def transpile(self):
+
         self.errors.clear()
         if self.Variables.totalLineCount == 0:
             return
@@ -107,12 +125,12 @@ class Transpiler(Utils):
                 self.Variables.code_done.insert(0, """void betterdelay(int ms) {
                 delay(ms);}""")
                 self.Variables.code_done.append("void loop() {}")
-            return "\n".join([open("server/compiler/SerialCommunication/ArduinoSerial.ino",
+            return "\n".join([open("server/transpiler/SerialCommunication/ArduinoSerial.ino",
                                    "r").read()] + self.Variables.code_done)
         included = ["#include <iostream>", "#include <cmath>"]
         namespaces = ["using namespace std;"]
         if connection_needed:
-            included.append('#include "server/compiler/SerialCommunication/SerialPc.cpp"')
+            included.append('#include "server/transpiler/SerialCommunication/SerialPc.cpp"')
 
         if "delay" in self.Variables.builtins_needed:
             included.append('#include <chrono>')

@@ -1,6 +1,6 @@
-from server.compiler.constants import Constants
-from server.compiler.error import Error
-from server.compiler.utils import StaticUtils
+from server.transpiler.constants import Constants
+from server.transpiler.error import Error
+from server.transpiler.utils import StaticUtils
 
 
 

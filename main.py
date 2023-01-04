@@ -1,5 +1,5 @@
-from server.compiler.runner import Runner
-from server.compiler.transpiler import Transpiler
+from server.transpiler.runner import Runner
+from server.transpiler.transpiler import Transpiler
 import sys
 import pyunpack
 import os

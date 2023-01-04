@@ -1,6 +1,6 @@
 import subprocess
 import os
-from server.compiler.transpiler import Transpiler
+from server.transpiler.transpiler import Transpiler
 
 
 class Runner:
@@ -70,13 +70,13 @@ class Runner:
             f.write(code)
         self.board = self.get_boards()[0]  # TODO select right option
         subprocess.run(
-            ["server/compiler/arduino-cli", "compile", "--fqbn", self.board[1], "temp"])
+            ["server/transpiler/arduino-cli", "compile", "--fqbn", self.board[1], "temp"])
 
     @staticmethod
     def get_boards():
         # TODO select option
         boards = [p.split(" ") for p in
-                  subprocess.run(["server/compiler/arduino-cli", "board", "list"], capture_output=True).stdout.decode(
+                  subprocess.run(["server/transpiler/arduino-cli", "board", "list"], capture_output=True).stdout.decode(
                       "utf-8").split("\n")[1:] if "arduino" in p]
         if len(boards) == 0:
             print("No boards found, connect a board and try again")
@@ -91,7 +91,7 @@ class Runner:
         return subprocess.getoutput(f"temp_{self.runner_id}.exe")
 
     def run_board(self):
-        subprocess.run(["server/compiler/arduino-cli", "upload", "-b", self.board[1], "-p", self.board[0], "temp"])
+        subprocess.run(["server/transpiler/arduino-cli", "upload", "-b", self.board[1], "-p", self.board[0], "temp"])
 
     def stop(self):
         subprocess.run(["taskkill", "/f", "/im", f"temp_{self.runner_id}.exe"])

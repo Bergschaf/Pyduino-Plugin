@@ -21,7 +21,7 @@ from lsprotocol.types import (TEXT_DOCUMENT_DID_OPEN, TEXT_DOCUMENT_DID_CHANGE)
 from lsprotocol.types import (CompletionList, CompletionParams, DidOpenTextDocumentParams,DidChangeTextDocumentParams)
 
 
-from server.compiler.transpiler import Transpiler
+from server.transpiler.transpiler import Transpiler
 
 print("Starting server...")
 

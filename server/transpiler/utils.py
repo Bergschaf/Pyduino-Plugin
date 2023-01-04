@@ -1,5 +1,5 @@
-from server.compiler.constants import Constants
-from server.compiler.error import Error
+from server.transpiler.constants import Constants
+from server.transpiler.error import Error
 
 
 class Utils:
