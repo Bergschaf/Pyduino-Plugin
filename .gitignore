@@ -7,3 +7,4 @@ env
 pygls.log
 test.py
 mingw/MinGW
+server/transpiler/.idea

@@ -3,7 +3,6 @@ from server.transpiler.error import Error
 from server.transpiler.utils import StaticUtils
 
 
-
 class Builtins:
     def __init__(self, variables, errors):
         self.Variables = variables
@@ -17,9 +16,9 @@ class Builtins:
         if function_name == "print":
             return self.do_print(args, kwargs)
         elif function_name == "analogRead":
-            return self.do_analog_read(args, kwargs)
+            return self.do_analogRead(args, kwargs)
         elif function_name == "analogWrite":
-            return self.do_analog_write(args, kwargs)
+            return self.do_analogWrite(args, kwargs)
         elif function_name == "delay":
             return self.do_delay(args, kwargs)
         elif function_name == "len":
@@ -46,6 +45,17 @@ class Builtins:
         if dt in Constants.PRIMITIVE_ARRAY_TYPES:
             return f"sizeof({arg}) / sizeof({arg}[0])", "int", True
 
+    def do_print(self, args, kwargs):
+        raise NotImplementedError
+
+    def do_analogWrite(self, args, kwargs):
+        raise NotImplementedError
+
+    def do_analogRead(self, args, kwargs):
+        raise NotImplementedError
+
+    def do_delay(self, args, kwargs):
+        raise NotImplementedError
 
 
 class BuiltinsArduino(Builtins):
@@ -54,7 +64,7 @@ class BuiltinsArduino(Builtins):
         self.Variables = variables
         self.errors = errors
 
-    def do_analog_read(self, args, kwargs, after_col=0):
+    def do_analogRead(self, args, kwargs, after_col=0):
         pin, dt = args[0]
         if dt != "int":
             self.errors.append(
@@ -86,7 +96,7 @@ class BuiltinsArduino(Builtins):
             return None, None, True
         return f"analogRead(A{pin})", "int", True
 
-    def do_analog_write(self, args, kwargs):
+    def do_analogWrite(self, args, kwargs):
         pos_start = self.Variables.currentLine.index("analogWrite")
         pos_end = StaticUtils.find_closing_bracket_in_value(self.errors, self.Variables, self.Variables.currentLine,
                                                             "(",
@@ -203,7 +213,8 @@ class BuiltinsPC(Builtins):
 
                 if lastsplit < i: res.append(f"cout << {space.join(a[0] for a in args[lastsplit:i])};")
                 sys_var = self.next_sys_variable()
-                res.append(f"cout << '[';\nfor (int {sys_var} = 0; {sys_var} < sizeof({arg}) / sizeof({arg}[0]) - 1; {sys_var}++){{ cout << {arg}[{sys_var}] << ',' << ' ';}}")
+                res.append(
+                    f"cout << '[';\nfor (int {sys_var} = 0; {sys_var} < sizeof({arg}) / sizeof({arg}[0]) - 1; {sys_var}++){{ cout << {arg}[{sys_var}] << ',' << ' ';}}")
                 res.append(f"cout << {arg}[sizeof({arg}) / sizeof({arg}[0])-1] << ']';")
                 lastsplit = i + 1
 
@@ -211,7 +222,7 @@ class BuiltinsPC(Builtins):
         res.append(f"cout {newline};")
         return "".join(res), None, False
 
-    def do_analog_read(self, args, kwargs):
+    def do_analogRead(self, args, kwargs):
         self.Variables.connection_needed = True
         self.Variables.builtins_needed.append("analogRead")
         pin, dt = args[0]
@@ -245,7 +256,7 @@ class BuiltinsPC(Builtins):
         [self.Variables.code_done.append(l) for l in code]
         return sys_var, "int", True
 
-    def do_analog_write(self, args, kwargs):
+    def do_analogWrite(self, args, kwargs):
         self.Variables.connection_needed = True
         pin, dt = args[0]
         value, dt2 = args[1]

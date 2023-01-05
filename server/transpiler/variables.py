@@ -1,6 +1,6 @@
 class Variables:
     def __init__(self):
-        self.scope: dict[tuple[int, int], list[list[tuple[str, str]], list[tuple[str, str]]]] = None
+        self.scope: dict[tuple[int, int], list[list[tuple[str, str]], list[tuple[str, str]]]]
         self.connection_needed: bool = False
         self.code_done: list[str] = []
         self.currentLineIndex: int = 0
@@ -13,3 +13,4 @@ class Variables:
         self.totalLineCount = 0
         self.inLoop = 0
         self.inIndentation = 0
+        self.errors: list = []
