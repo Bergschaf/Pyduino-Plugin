@@ -47,8 +47,7 @@ class Runner:
         with open(f"temp_{self.runner_id}.cpp", "w") as f:
             f.write(code)
         # print output
-        #print(subprocess.run(["mingw/MinGW/bin/g++.exe", f"temp_{self.runner_id}.cpp", "-o", f"temp_{self.runner_id}.exe"]).stdout)
-        print(subprocess.run(["g++", f"temp_{self.runner_id}.cpp", "-o", f"temp_{self.runner_id}.exe"]).stdout)
+        print(subprocess.run(["mingw/MinGW/bin/g++.exe", f"temp_{self.runner_id}.cpp", "-o", f"temp_{self.runner_id}.exe"]).stdout)
 
 
     def run_pc(self):

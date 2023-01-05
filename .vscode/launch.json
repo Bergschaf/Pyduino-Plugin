@@ -30,7 +30,7 @@
                 "--tcp"
             ],
             "justMyCode": false,
-            "python": "${command:python.interpreterPath}",
+            "python": "${workspaceFolder}/env/Scripts/python.exe",
             "cwd": "${workspaceFolder}",
             "env": {
                 "python.PYTHONPATH": "${workspaceFolder}"
@@ -45,7 +45,7 @@
                 "--ws"
             ],
             "justMyCode": false,
-            "python": "${command:python.interpreterPath}",
+            "python": "$${workspaceFolder}/env/Scripts/python.exe",
             "cwd": "${workspaceFolder}",
             "env": {
                 "python.PYTHONPATH": "${workspaceFolder}"
