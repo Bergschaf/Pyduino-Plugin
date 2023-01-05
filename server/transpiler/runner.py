@@ -1,6 +1,8 @@
 import subprocess
 import os
 from server.transpiler.transpiler import Transpiler
+import requests
+import patoolib
 
 
 class Runner:
@@ -47,13 +49,19 @@ class Runner:
         with open(f"temp_{self.runner_id}.cpp", "w") as f:
             f.write(code)
         # print output
-        print(subprocess.run(["mingw/MinGW/bin/g++.exe", f"temp_{self.runner_id}.cpp", "-o", f"temp_{self.runner_id}.exe"]).stdout)
+        self.check_mingw()
+        os.system(f'cmd /c "set PATH=%PATH%;C:/Users/info/VsCodeProjects/Pyduino-Plugin/mingw/MinGW/bin&g++ temp_{self.runner_id}.cpp -o temp_{self.runner_id}.exe')
 
+    def check_mingw(self):
+        if not os.path.exists("mingw/MinGW/bin/g++.exe"):
+            print("Extracting MinGW...")
+            patoolib.extract_archive("mingw/MinGW.7z", outdir="mingw")
+            print("MinGW installed")
 
     def run_pc(self):
         # show the output in the vscode terminal
-        subprocess.Popen(f"temp_{self.runner_id}.exe")
         print("--- Program started ---")
+        os.system(f'cmd /c "set PATH=%PATH%;C:/Users/info/VsCodeProjects/Pyduino-Plugin/mingw/MinGW/bin&temp_{self.runner_id}.exe"')
 
     def compile_board(self):
         self.transpiler_board.transpile()

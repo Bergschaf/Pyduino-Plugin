@@ -1,13 +1,11 @@
 from server.transpiler.runner import Runner
 from server.transpiler.transpiler import Transpiler
 import sys
-import pyunpack
+import patoolib
 import os
 
-def runFile(file):
-    if os.listdir("mingw") == ["MinGW.7z"]:
-        pyunpack.Archive("mingw/mingw.7z").extractall("mingw")
 
+def runFile(file):
     if not file.endswith(".pino"):
         print("File must be a .pino file")
         exit()
