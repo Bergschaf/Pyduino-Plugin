@@ -70,3 +70,6 @@ digitalWrite(12, 0)
 These functions can also be called on the PC if the Arduino is connected to the PC. The PC will then write to the Arduino's
 serial port and the Arduino will read the value and write it to the pin, but this process is a lot slower than calling the functions directly on the Arduino.
 
+# Getting Started
+
+
