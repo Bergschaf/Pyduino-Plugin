@@ -2,6 +2,7 @@
 .gitignore
 .idea
 client/out/*.map
+doc
 client/src/
 tsconfig.json
 tslint.json
@@ -12,3 +13,4 @@ test
 benchmark.py
 mingw/MinGW
 .pytest_cache
+*.vsix

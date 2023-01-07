@@ -8,3 +8,4 @@ test.py
 mingw/MinGW
 server/transpiler/.idea
 *.vsix
+*.pyc

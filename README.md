@@ -72,4 +72,7 @@ serial port and the Arduino will read the value and write it to the pin, but thi
 
 # Getting Started
 
+## Installing VS Code
+To get started, you need to install VS Code. You can download it from [here](https://code.visualstudio.com/Download).
+
 

@@ -31,7 +31,7 @@ COUNT_DOWN_SLEEP_IN_SECONDS = 1
 LAUNCH_JSON = """{
     "configurations": [
         {
-            "name":"test",
+            "name":"Pyduino",
             "type": "python",
             "request": "launch",
             "python": "${extensionInstallFolder:Bergschaf.pyduino-extension}/env/Scripts/python.exe",

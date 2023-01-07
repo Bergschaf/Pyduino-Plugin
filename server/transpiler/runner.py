@@ -50,7 +50,7 @@ class Runner:
             f.write(code)
         # print output
         self.check_mingw()
-        os.system(f'cmd /c "set PATH=%PATH%;C:/Users/info/VsCodeProjects/Pyduino-Plugin/mingw/MinGW/bin&g++ temp_{self.runner_id}.cpp -o temp_{self.runner_id}.exe')
+        os.system(f'cmd /c "set PATH=%PATH%;{os.getcwd()}/mingw/MinGW/bin&g++ temp_{self.runner_id}.cpp -o temp_{self.runner_id}.exe')
 
     def check_mingw(self):
         if not os.path.exists("mingw/MinGW/bin/g++.exe"):
@@ -61,7 +61,7 @@ class Runner:
     def run_pc(self):
         # show the output in the vscode terminal
         print("--- Program started ---")
-        os.system(f'cmd /c "set PATH=%PATH%;C:/Users/info/VsCodeProjects/Pyduino-Plugin/mingw/MinGW/bin&temp_{self.runner_id}.exe"')
+        os.system(f'cmd /c "set PATH=%PATH%;{os.getcwd()}/mingw/MinGW/bin&temp_{self.runner_id}.exe"')
 
     def compile_board(self):
         self.transpiler_board.transpile()
