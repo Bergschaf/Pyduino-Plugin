@@ -15,7 +15,24 @@ To exchange data or call functions between the PC and the Arduino, the serial po
 thread to listen for data from the Arduino. The Arduino doesn't support multithreading, so it checks after every command	thread to listen for data from the Arduino. The Arduino doesn't support multithreading, so it checks after every command
 if there is data to be read from the serial port. If there is, it reads it and executes the command.	if there is data to be read from the serial port. If there is, it reads it and executes the command.
 
+## Getting Started
 
+
+To get started, you need to install VS Code. You can download it from [here](https://code.visualstudio.com/Download).
+
+You also need a Python interpreter. You can download it from [here](https://www.python.org/downloads/release/python-3102/).
+Make sure to add Python to your PATH by checking the box in the installer.
+
+![img.png](doc/img.png)
+
+To install the Pyduino extension, open VS Code and press Ctrl+Shift+X to open the extensions menu. Search for Pyduino and install it.
+
+Then open a .pino file and the Extension will provide Syntax Highlighting and Error Checking.
+
+To run the code, press Ctrl+Shift+D to open the Debug menu. Select the Pyduino configuration and press the green play button.
+
+
+## Features
 ### Variables
 Variables are declared with the datatype and name, and can be assigned a value.
 There is no semicolon at the end of a line.
@@ -68,20 +85,4 @@ digitalWrite(12, 0)
 
 These functions can also be called on the PC if the Arduino is connected to the PC. The PC will then write to the Arduino's
 serial port and the Arduino will read the value and write it to the pin, but this process is a lot slower than calling the functions directly on the Arduino.
-
-# Getting Started
-
-
-To get started, you need to install VS Code. You can download it from [here](https://code.visualstudio.com/Download).
-
-You also need a Python interpreter. You can download it from [here](https://www.python.org/downloads/release/python-3102/).
-Make sure to add Python to your PATH by checking the box in the installer.
-
-![img.png](doc/img.png)
-
-To install the Pyduino extension, open VS Code and press Ctrl+Shift+X to open the extensions menu. Search for Pyduino and install it.
-
-Then open a .pino file and the Extension will provide Syntax Highlighting and Error Checking.
-
-To run the code, press Ctrl+Shift+D to open the Debug menu. Select the Pyduino configuration and press the green play button.
 
