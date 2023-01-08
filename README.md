@@ -10,10 +10,10 @@ It is designed to be easy to learn and use, and is a great way to get started wi
 - They can run independently or together
 - VS Code Extension do develop and run Pyduino programs
 
-The language works by transpiling the Pyduino code to C++ and the compiling it to run on the Arduino and on the PC.	The language works by transpiling the Pyduino code to C++ and the compiling it to run on the Arduino and on PC.
-To exchange data or call functions between the PC and the Arduino, the serial port is used. The PC uses a separate listener	To exchange data or call functions between the PC and the Arduino, the serial port is used. The PC uses a separate listener
-thread to listen for data from the Arduino. The Arduino doesn't support multithreading, so it checks after every command	thread to listen for data from the Arduino. The Arduino doesn't support multithreading, so it checks after every command
-if there is data to be read from the serial port. If there is, it reads it and executes the command.	if there is data to be read from the serial port. If there is, it reads it and executes the command.
+The language works by transpiling the Pyduino code to C++ and the compiling it to run on the Arduino and on the PC.	
+To exchange data or call functions between the PC and the Arduino, the serial port is used. The PC uses a separate listener
+thread to listen for data from the Arduino. The Arduino doesn't support multithreading, so it checks after every command	
+if there is data to be read from the serial port. If there is, it reads it and executes the command.
 
 ## Getting Started
 
