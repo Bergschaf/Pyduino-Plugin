@@ -72,7 +72,17 @@ serial port and the Arduino will read the value and write it to the pin, but thi
 
 # Getting Started
 
-## Installing VS Code
+
 To get started, you need to install VS Code. You can download it from [here](https://code.visualstudio.com/Download).
 
+You also need a Python interpreter. You can download it from [here](https://www.python.org/downloads/release/python-3102/).
+Make sure to add Python to your PATH by checking the box in the installer.
+
+![img.png](doc/img.png)
+
+To install the Pyduino extension, open VS Code and press Ctrl+Shift+X to open the extensions menu. Search for Pyduino and install it.
+
+Then open a .pino file and the Extension will provide Syntax Highlighting and Error Checking.
+
+To run the code, press Ctrl+Shift+D to open the Debug menu. Select the Pyduino configuration and press the green play button.
 
