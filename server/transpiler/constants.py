@@ -10,8 +10,8 @@ class Constants:
     VALID_NAME_START_LETTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_"
     VALID_NAME_LETTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
 
-    PRIMITIVE_TYPES = ["int", "float", "char", "bool"]
-    PRIMITIVE_ARRAY_TYPES = ["int[]", "float[]", "char[]", "bool[]"]
+    PRIMITIVE_TYPES = ["int", "float"]
+    PRIMITIVE_ARRAY_TYPES = ["int[]", "float[]"]
     NUMERIC_TYPES = ["int", "float"]
     ITERABLES = PRIMITIVE_ARRAY_TYPES
 
