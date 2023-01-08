@@ -20,7 +20,7 @@ if there is data to be read from the serial port. If there is, it reads it and e
 
 To get started, you need to install VS Code. You can download it from [here](https://code.visualstudio.com/Download).
 
-You also need a Python interpreter. You can download it from [here](https://www.python.org/downloads/release/python-3102/).
+You also need a Python interpreter. You can download it from [here](https://www.python.org/downloads/release/python-3102/) (at the bottom of the page).
 Make sure to add Python to your PATH by checking the box in the installer.
 
 ![img.png](doc/img.png)
