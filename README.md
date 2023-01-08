@@ -8,14 +8,13 @@ It is designed to be easy to learn and use, and is a great way to get started wi
 - The PC can acces Arduino's pins and sensors
 - The Arduino print to the PC's console and call functions on the PC
 - They can run independently or together
-- In the future, Pyduino will have a IntelliJ based IDE for easy development 
+- VS Code Extension do develop and run Pyduino programs
 
-The language works by transpiling the Pyduino code to C++ and the compiling it to run on the Arduino and on the PC.
-To exchange data or call functions between the PC and the Arduino, the serial port is used. The PC uses a separate listener
-thread to listen for data from the Arduino. The Arduino doesn't support multithreading, so it checks after every command
-if there is data to be read from the serial port. If there is, it reads it and executes the command.
+The language works by transpiling the Pyduino code to C++ and the compiling it to run on the Arduino and on the PC.	The language works by transpiling the Pyduino code to C++ and the compiling it to run on the Arduino and on PC.
+To exchange data or call functions between the PC and the Arduino, the serial port is used. The PC uses a separate listener	To exchange data or call functions between the PC and the Arduino, the serial port is used. The PC uses a separate listener
+thread to listen for data from the Arduino. The Arduino doesn't support multithreading, so it checks after every command	thread to listen for data from the Arduino. The Arduino doesn't support multithreading, so it checks after every command
+if there is data to be read from the serial port. If there is, it reads it and executes the command.	if there is data to be read from the serial port. If there is, it reads it and executes the command.
 
-## Syntax
 
 ### Variables
 Variables are declared with the datatype and name, and can be assigned a value.
