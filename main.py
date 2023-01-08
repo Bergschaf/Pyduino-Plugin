@@ -1,8 +1,6 @@
 from server.transpiler.runner import Runner
 from server.transpiler.transpiler import Transpiler
 import sys
-import patoolib
-import os
 
 
 def runFile(file):

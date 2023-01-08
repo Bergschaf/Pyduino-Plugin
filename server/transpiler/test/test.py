@@ -1,8 +1,8 @@
 import unittest
-from transpiler import Transpiler
-from runner import Runner
+from server.transpiler.transpiler import Transpiler
+from server.transpiler.runner import Runner
 import multiprocessing
-
+import os
 
 def compilation(code, expected, connection_needed=False):
     compiler = Transpiler(code, "pc")
