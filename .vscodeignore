@@ -14,3 +14,4 @@ benchmark.py
 mingw/MinGW
 .pytest_cache
 *.vsix
+*.pyc
