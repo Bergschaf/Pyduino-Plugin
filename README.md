@@ -29,7 +29,7 @@ To install the Pyduino extension, open VS Code and press Ctrl+Shift+X to open th
 
 Then open a .pino file and the Extension will provide Syntax Highlighting and Error Checking.
 
-To run the code, press Ctrl+Shift+D to open the Debug menu. Select the Pyduino configuration and press the green play button.
+To run the code, press Ctrl+Shift+D to open the Debug menu. Select the Pyduino configuration and press the green run button.
 
 
 ## Features
