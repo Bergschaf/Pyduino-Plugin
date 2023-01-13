@@ -98,26 +98,24 @@ export function activate(context: ExtensionContext): void {
             }
             if (stderr) {
                 console.log(`stderr: ${stderr}`);
-                return;
             }
             console.log(`stdout: ${stdout}`);
             const interpreter = stdout.split("\n")[0];
             // remove the python.exe from the path
             const cfg = "home = " + interpreter.substring(0, interpreter.length - 12) + "\ninclude-system-site-packages = false";
             fs.writeFileSync(path.join(cwd, "env/pyvenv.cfg"), cfg);
+            client = startLangServer(pythonPath, ["-m", "server"], cwd);
+            context.subscriptions.push(client.start());
+
         });
-
-
 
         //const pythonPath = workspace
         //    .getConfiguration("python")
         //    .get<string>("pythonPath");
 
 
-        client = startLangServer(pythonPath, ["-m", "server"], cwd);
     }
 
-    context.subscriptions.push(client.start());
 
 }
 

@@ -1,10 +1,10 @@
 {
-  "name": "pyduino",
+  "name": "pyduino-extension",
   "description": "Pyduino is a programming language for the Arduino. It is based on Python and is designed to be easy to learn and use.",
   "author": "Bergschaf",
   "repository": "https://github.com/Bergschaf/Pyduino-Plugin",
   "license": "Apache-2.0",
-  "version": "2.0.0",
+  "version": "2.0.3",
   "activationEvents": [
       "onLanguage:pyduino"
   ],
