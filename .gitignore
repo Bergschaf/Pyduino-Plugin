@@ -9,3 +9,4 @@ mingw/MinGW
 server/transpiler/.idea
 *.vsix
 *.pyc
+/test.c
