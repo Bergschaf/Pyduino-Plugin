@@ -581,7 +581,7 @@ class Utils:
                 valueList.append(self.check_function_execution(value[start_col:end_col + 1]))
                 lastsplit = end_col + 1
                 while i < lastsplit:
-                    next(iterator)
+                    i = next(iterator)
 
             elif i + 2 < len(value) and value[
                                         i:i + 2] in Constants.CONDITION_OPERATORS_LEN2 + Constants.ARITHMETIC_OPERATORS_LEN2:
