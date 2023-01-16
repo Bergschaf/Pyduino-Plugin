@@ -29,22 +29,38 @@ COUNT_DOWN_START_IN_SECONDS = 10
 COUNT_DOWN_SLEEP_IN_SECONDS = 1
 
 LAUNCH_JSON = """{
-    "configurations": [
-        {
-            "name":"Pyduino",
-            "type": "python",
-            "request": "launch",
-            "python": "${extensionInstallFolder:Bergschaf.pyduino-extension}/env/Scripts/python.exe",
-            "program": "${extensionInstallFolder:Bergschaf.pyduino-extension}/main.py",
-            "cwd": "${extensionInstallFolder:Bergschaf.pyduino-extension}",
-            "args": [
-                "${file}"
-            ],
-            "console": "internalConsole",
-            "internalConsoleOptions": "openOnSessionStart"
-        }
-    ]   
+  "version": "2.0.0",
+  "configurations": [
+    {
+      "name": "Pyduino",
+      "type": "node",
+      "request": "launch",
+      "program": ".vscode/nothing.js",
+      "console": "internalConsole",
+      "internalConsoleOptions": "neverOpen",
+      "preLaunchTask": "pyduino",
+    }
+  ]
 }"""
+
+TASKS_JSON = """{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "pyduino",
+            "command": "./env/Scripts/python.exe",
+            "args": [
+                "main.py", "${file}"
+            ],
+            "type": "shell",
+            "options": {
+                "cwd": "${extensionInstallFolder:Bergschaf.pyduino-extension}"
+            },
+        }
+    ]
+}"""
+
+NOTHING_JS = "process.exit(0)"
 
 
 class PyduinoLanguageServer(LanguageServer):
@@ -104,6 +120,10 @@ async def did_open(ls, params: DidOpenTextDocumentParams):
         os.mkdir(base_path + "\\\\.vscode")
     with open(base_path + "\\\\.vscode\\\\launch.json", "w") as f:
         f.write(LAUNCH_JSON)
+    with open(base_path + "\\\\.vscode\\\\tasks.json", "w") as f:
+        f.write(TASKS_JSON)
+    with open(base_path + ".vscode\\\\nothing.js", "w") as f:
+        f.write(NOTHING_JS)
     _validate(ls, params)
 
 

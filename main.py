@@ -1,6 +1,7 @@
 from server.transpiler.runner import Runner
 from server.transpiler.transpiler import Transpiler
 import sys
+import subprocess
 
 
 def runFile(file):
@@ -17,4 +18,6 @@ def runFile(file):
 
 if __name__ == '__main__':
     file = sys.argv[1]
+    # clear console
+    subprocess.call('cls', shell=True)
     runFile(file)
