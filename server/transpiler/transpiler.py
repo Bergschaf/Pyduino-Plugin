@@ -30,8 +30,9 @@ class Transpiler(Utils):
             builtins = BuiltinsPC(self.Variables, self.errors)
         else:
             raise Exception("Invalid mode")
-        # Die Builtins Klasse enthält die Funktionen die in Pyduino verfügbar sind. Diese können von der Platform abhängen.
 
+        # Die Builtins Klasse enthält die Funktionen die in Pyduino verfügbar sind. Diese sind von der Plattform (also
+        # PC oder Arduino) abhängig
         super().__init__(self.Variables, builtins, self.errors)
         self.code: list[str] = code
         self.mode: str = mode

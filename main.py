@@ -15,7 +15,6 @@ def runFile(file):
     runner = Runner(compiler_pc, compiler_board)
     runner.run()
 
-
 if __name__ == '__main__':
     file = sys.argv[1]
     # clear console
