@@ -20,48 +20,29 @@ from pygls.server import LanguageServer
 from lsprotocol.types import (TEXT_DOCUMENT_DID_OPEN, TEXT_DOCUMENT_DID_CHANGE)
 from lsprotocol.types import (CompletionList, CompletionParams, DidOpenTextDocumentParams,DidChangeTextDocumentParams)
 
-
 from server.transpiler.transpiler import Transpiler
+
+import json
 
 print("Starting server...")
 
 COUNT_DOWN_START_IN_SECONDS = 10
 COUNT_DOWN_SLEEP_IN_SECONDS = 1
 
-LAUNCH_JSON = """{
-  "version": "2.0.0",
-  "configurations": [
-    {
-      "name": "Pyduino",
-      "type": "node",
-      "request": "launch",
-      "program": ".vscode/nothing.js",
-      "console": "internalConsole",
-      "internalConsoleOptions": "neverOpen",
-      "preLaunchTask": "pyduino",
-    }
-  ]
-}"""
-
-TASKS_JSON = """{
-    "version": "2.0.0",
-    "tasks": [
-        {
-            "label": "pyduino",
-            "command": "./env/Scripts/python.exe",
-            "args": [
-                "main.py", "${file}"
-            ],
-            "type": "shell",
-            "options": {
-                "cwd": "${extensionInstallFolder:Bergschaf.pyduino-extension}"
-            },
-        }
-    ]
-}"""
-
-NOTHING_JS = "process.exit(0)"
-
+SETTINGS = {
+    "actionButtons": {
+        "reloadButton": None,
+        "loadNpmCommands": False,
+        "commands": [
+            {
+                "name": "$(triangle-right) Run Pyduino",
+                "cwd": "${extensionInstallFolder:Bergschaf.pyduino-extension}",
+                "command": "env/Scripts/python.exe main.py ${file}",
+            }
+        ]
+    },
+    "files.autoSave": "onFocusChange"
+}
 
 class PyduinoLanguageServer(LanguageServer):
     runner = None
@@ -118,12 +99,16 @@ async def did_open(ls, params: DidOpenTextDocumentParams):
 
     if not os.path.exists(base_path + "\\\\.vscode"):
         os.mkdir(base_path + "\\\\.vscode")
-    with open(base_path + "\\\\.vscode\\\\launch.json", "w") as f:
-        f.write(LAUNCH_JSON)
-    with open(base_path + "\\\\.vscode\\\\tasks.json", "w") as f:
-        f.write(TASKS_JSON)
-    with open(base_path + ".vscode\\\\nothing.js", "w") as f:
-        f.write(NOTHING_JS)
+    if not os.path.exists(base_path + "\\\\.vscode\\settings.json"):
+        with open(base_path + "\\\\.vscode\\settings.json", "w") as f:
+            json.dump(SETTINGS, f, indent=4)
+    else:
+        with open(base_path + "\\\\.vscode\\settings.json", "r") as f:
+            data = json.load(f)
+        data.update(SETTINGS)
+        with open(base_path + "\\\\.vscode\\settings.json", "w") as f:
+            json.dump(data, f, indent=4)
+
     _validate(ls, params)
 
 

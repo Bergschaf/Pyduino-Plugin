@@ -47,6 +47,10 @@
     "typescript": "^4.4.4"
   },
   "dependencies": {
+
     "vscode-languageclient": "^7.0.0"
-  }
+  },
+  "extensionDependencies": [
+    "seunlanlege.action-buttons"
+  ]
 }
