@@ -20,14 +20,14 @@
 
 import * as net from "net";
 import * as path from "path";
-import { ExtensionContext, ExtensionMode, workspace , window, commands} from "vscode";
+import { ExtensionContext, ExtensionMode, workspace, window, commands } from "vscode";
 import {
     LanguageClient,
     LanguageClientOptions,
     ServerOptions,
 } from "vscode-languageclient/node";
 import * as fs from "fs";
-import {exec} from "child_process";
+import { exec } from "child_process";
 
 let client: LanguageClient;
 
@@ -81,40 +81,27 @@ function startLangServer(
 
 export function activate(context: ExtensionContext): void {
 
-    if (false) { //  (context.extensionMode === ExtensionMode.Development) {
-        // Development - Run the server manually
-        client = startLangServerTCP(2087);
-    } else {
-        // Production - Client is going to run the server (for use within `.vsix` package)
-        const cwd = path.join(__dirname, "..", "..");
-        const pythonPath = "env/Scripts/python.exe"
+    const cwd = path.join(__dirname, "..", "..");
+    const pythonPath = "env/Scripts/python.exe"
 
-        // write the file env/pyvenv.cfg  the value of home to the path of the system python interpreter
-        // from the path variable
-        exec("where python", (error, stdout, stderr) => {
-            if (error) {
-                console.log(`error: ${error.message}`);
-                return;
-            }
-            if (stderr) {
-                console.log(`stderr: ${stderr}`);
-            }
-            console.log(`stdout: ${stdout}`);
-            const interpreter = stdout.split("\n")[0];
-            // remove the python.exe from the path
-            const cfg = "home = " + interpreter.substring(0, interpreter.length - 12) + "\ninclude-system-site-packages = false";
-            fs.writeFileSync(path.join(cwd, "env/pyvenv.cfg"), cfg);
-            client = startLangServer(pythonPath, ["-m", "server"], cwd);
-            context.subscriptions.push(client.start());
+    exec("where python", (error, stdout, stderr) => {
+        if (error) {
+            console.log(`error: ${error.message}`);
+            return;
+        }
+        if (stderr) {
+            console.log(`stderr: ${stderr}`);
+        }
+        console.log(`stdout: ${stdout}`);
+        const interpreter = stdout.split("\n")[0];
+        // remove the python.exe from the path
+        const cfg = "home = " + interpreter.substring(0, interpreter.length - 12) + "\ninclude-system-site-packages = false";
+        fs.writeFileSync(path.join(cwd, "env/pyvenv.cfg"), cfg);
+        client = startLangServer(pythonPath, ["-m", "server"], cwd);
+        context.subscriptions.push(client.start());
 
-        });
+    });
 
-        //const pythonPath = workspace
-        //    .getConfiguration("python")
-        //    .get<string>("pythonPath");
-
-
-    }
 
 
 }
