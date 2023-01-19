@@ -23,7 +23,10 @@ To get started, you need to install VS Code. You can download it from [here](htt
 You also need a Python interpreter. You can download it from [here](https://www.python.org/downloads/release/python-3102/) (at the bottom of the page).
 Make sure to add Python to your PATH by checking the box in the installer.
 
+
 ![img.png](doc/img.png)
+
+Currently, 7zip is required to extract the C++ Compiler extension. You can download it from [here](https://www.7-zip.org/download.html).
 
 To install the Pyduino extension, open VS Code and press Ctrl+Shift+X to open the extensions menu. Search for Pyduino and install it.
 
