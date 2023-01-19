@@ -80,6 +80,14 @@ function startLangServer(
 }
 
 export function activate(context: ExtensionContext): void {
+    if (context.extensionMode === ExtensionMode.Development) {
+        // Development - Run the server manually
+        client = startLangServerTCP(2087);
+        console.log("Development mode");
+        context.subscriptions.push(client.start());
+    }
+        
+    else {
 
     const cwd = path.join(__dirname, "..", "..");
     const pythonPath = "env/Scripts/python.exe"
@@ -100,7 +108,7 @@ export function activate(context: ExtensionContext): void {
         client = startLangServer(pythonPath, ["-m", "server"], cwd);
         context.subscriptions.push(client.start());
 
-    });
+    });}
 
 
 
