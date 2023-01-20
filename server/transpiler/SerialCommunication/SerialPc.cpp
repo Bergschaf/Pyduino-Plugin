@@ -253,6 +253,7 @@ public:
     Serial *SP;
     thread *listenerThread{};
     explicit Arduino(){
+
         this->SP = new Serial(R"(\\.\COM5)");
         if (!SP->IsConnected()) {
                 cout << "Connection Error" << endl;

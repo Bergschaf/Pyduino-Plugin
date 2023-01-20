@@ -1,7 +1,7 @@
 import subprocess
 import os
 from server.transpiler.transpiler import Transpiler
-import requests
+import serial
 import patoolib
 
 
@@ -93,12 +93,27 @@ class Runner:
             print(f"{i + 1}. {b[0]} - {b[-2]}")
         return [(b[0], b[-2]) for b in boards]
 
+    @staticmethod
+    def get_port():
+        for i in range(100):
+            try:
+                ser = serial.Serial(f"COM{i}", 9600)
+                port = ser.name
+                ser.close()
+                print(f"Connected to COM{i}")
+                break
+            except serial.serialutil.SerialException:
+        else:
+            print("Arduino not connected")
+            exit()
+        return port
+
     def get_output_pc(self):
         self.compile_pc()
         return subprocess.getoutput(f"temp_{self.runner_id}.exe")
 
     def run_board(self):
-        subprocess.run(["server/transpiler/arduino-cli", "upload", "-b", self.board[1], "-p", self.board[0], "temp"])
+        subprocess.run(["server/transpiler/arduino-cli", "upload", "-b arduino:avr:uno -p", self.get_port(), "temp"])
 
     def stop(self):
         subprocess.run(["taskkill", "/f", "/im", f"temp_{self.runner_id}.exe"])
