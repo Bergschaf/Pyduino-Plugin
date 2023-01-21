@@ -1,7 +1,7 @@
 import subprocess
 import os
 from server.transpiler.transpiler import Transpiler
-import requests
+import serial
 import patoolib
 
 
@@ -50,7 +50,8 @@ class Runner:
             f.write(code)
         # print output
         self.check_mingw()
-        os.system(f'cmd /c "set PATH=%PATH%;{os.getcwd()}/mingw/MinGW/bin&g++ temp_{self.runner_id}.cpp -o temp_{self.runner_id}.exe')
+        os.system(
+            f'cmd /c "set PATH=%PATH%;{os.getcwd()}/mingw/MinGW/bin&g++ temp_{self.runner_id}.cpp -o temp_{self.runner_id}.exe')
 
     def check_mingw(self):
         if not os.path.exists("mingw/MinGW/bin/g++.exe"):
@@ -91,14 +92,32 @@ class Runner:
         print("Boards found:")
         for i, b in enumerate(boards):
             print(f"{i + 1}. {b[0]} - {b[-2]}")
+        with open("port.txt", "w") as f:
+            f.write(boards[0][0])
         return [(b[0], b[-2]) for b in boards]
+
+    # @staticmethod
+    # def get_port(): TODO detect the arduino type here
+    #    for i in range(2,100):
+    #        try:
+    #            ser = serial.Serial(f"COM{i}", 9600)
+    #            port = ser.name
+    #            ser.close()
+    #            print(f"Connected to COM{i}")
+    #            break
+    #        except serial.serialutil.SerialException:
+    #            pass
+    #    else:
+    #        print("Arduino not connected")
+    #        exit()
+    #    return port
 
     def get_output_pc(self):
         self.compile_pc()
         return subprocess.getoutput(f"temp_{self.runner_id}.exe")
 
     def run_board(self):
-        subprocess.run(["server/transpiler/arduino-cli", "upload", "-b", self.board[1], "-p", self.board[0], "temp"])
+        subprocess.run(["server/transpiler/arduino-cli", "upload", "-p", self.board[0], "temp"])
 
     def stop(self):
         subprocess.run(["taskkill", "/f", "/im", f"temp_{self.runner_id}.exe"])
