@@ -18,7 +18,7 @@ import os
 from typing import Optional
 from pygls.server import LanguageServer
 from lsprotocol.types import (TEXT_DOCUMENT_DID_OPEN, TEXT_DOCUMENT_DID_CHANGE)
-from lsprotocol.types import (CompletionList, CompletionParams, DidOpenTextDocumentParams,DidChangeTextDocumentParams)
+from lsprotocol.types import (CompletionList, CompletionParams, DidOpenTextDocumentParams, DidChangeTextDocumentParams)
 
 from server.transpiler.transpiler import Transpiler
 
@@ -37,12 +37,13 @@ SETTINGS = {
             {
                 "name": "$(triangle-right) Run Pyduino",
                 "cwd": "${extensionInstallFolder:Bergschaf.pyduino-extension}",
-                "command": "env/Scripts/python.exe main.py ${file}",
+                "command": "env/Scripts/python.exe main.py  \"${file}\""
             }
         ]
     },
     "files.autoSave": "onFocusChange"
 }
+
 
 class PyduinoLanguageServer(LanguageServer):
     runner = None
