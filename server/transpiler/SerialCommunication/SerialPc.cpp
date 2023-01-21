@@ -3,7 +3,7 @@
 //
 #include <iostream>
 #include "Serial.cpp"
-
+#include <fstream>
 
 using namespace std;
 #include <chrono>
@@ -253,7 +253,11 @@ public:
     Serial *SP;
     thread *listenerThread{};
     explicit Arduino(){
-        this->SP = new Serial(R"(\\.\COM5)");
+        ifstream file;
+        file.open("port.txt");
+        string port;
+        getline(file, port);
+        this->SP = new Serial(port.c_str());
         if (!SP->IsConnected()) {
                 cout << "Connection Error" << endl;
         }
