@@ -28,7 +28,9 @@ Make sure to add Python to your PATH by checking the box in the installer.
 
 Currently, 7zip is required to extract the C++ Compiler. You can download it from [here](https://www.7-zip.org/download.html).
 
-To install the Pyduino extension, open VS Code and press Ctrl+Shift+X to open the extensions menu. Search for Pyduino and install it.
+To install the Pyduino extension, open VS Code and press Ctrl+Shift+X to open the extensions menu. Search for pyduino-extension and install it.
+
+You might have to restart VS Code to complete the Installation.
 
 Then open a .pino file and the Extension will provide Syntax Highlighting and Error Checking.
 
