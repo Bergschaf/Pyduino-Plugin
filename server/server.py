@@ -38,6 +38,7 @@ SETTINGS = {
                 "name": "$(triangle-right) Run Pyduino",
                 "cwd": "${extensionInstallFolder:Bergschaf.pyduino-extension}",
                 "command": "env/Scripts/python.exe main.py ${file}",
+                "singleInstance": True
             }
         ]
     },
