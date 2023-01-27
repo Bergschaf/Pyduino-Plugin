@@ -4,7 +4,7 @@
   "author": "Bergschaf",
   "repository": "https://github.com/Bergschaf/Pyduino-Plugin",
   "license": "Apache-2.0",
-  "version": "2.0.9a",
+  "version": "2.0.10",
   "activationEvents": [
       "onLanguage:pyduino"
   ],
